@@ -1,0 +1,12 @@
+<header class="app-header">
+   <div class="app-header__icon">
+      <i class="fas {{ headerIcon }}"></i>
+   </div>
+   <div class="app-header__text">
+      <h2 class="app-header__heading">{{ headerTitle }}</h2>
+      <p class="app-header__description" *ngIf="headerDescription">{{ headerDescription }}<span
+         *ngIf="headerDescriptionValue" class="text-primary">: {{ headerDescriptionValue }}</span></p>
+   </div>
+   <a *ngIf="headerLinkURL" class="btn btn-info text-white ms-auto py-2 px-3"
+      routerLink="{{ headerLinkURL }}">{{ headerLinkText }}</a>
+</header>

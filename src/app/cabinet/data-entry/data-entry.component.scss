@@ -1,0 +1,107 @@
+.info {
+   display: grid;
+   grid-template-columns: 1fr 1fr;
+   grid-gap: 20px;
+   padding-top: 10px;
+   padding-bottom: 20px;
+}
+
+.info__card {
+   padding: 15px 20px;
+   background-color: #F9F9FB;
+   border-radius: 5px;
+}
+
+.info__item {
+   display: flex;
+   align-items: flex-start;
+   font-size: 14px;
+   line-height: 16px;
+
+   strong {
+      display: block;
+      width: 140px;
+      flex-shrink: 0;
+   }
+}
+
+.passengers__table {
+   margin-bottom: 20px;
+}
+
+thead {
+   background-color: #F9F9FB
+}
+
+.total-price {
+   padding-top: 20px;
+   text-align: right;
+
+   div:first-child {
+      font-size: 14px;
+      line-height: 16px;
+      color: #9EA7B8;
+   }
+
+   div:last-child {
+      font-weight: 400;
+      font-size: 30px;
+      line-height: 40px;
+   }
+}
+
+.passenger-modal {
+   max-width: 845px;
+   width: 845px;
+   background-color: #fff;
+   box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+   border-radius: 10px;
+
+   .app-card__heading {
+      padding: 20px;
+      border-bottom: 1px solid #D1DDE8;
+   }
+}
+
+.passenger-modal__body {
+   display: grid;
+   grid-template-columns: 0.4fr 1fr;
+   padding: 30px 20px;
+}
+
+.passenger-modal__passport {
+   position: relative;
+   margin-right: 20px;
+
+   img {
+      width: 100%;
+   }
+
+   .button--blue {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      padding-top: 15px;
+      padding-bottom: 15px;
+      height: auto;
+   }
+}
+
+.passenger-modal__form {
+   padding-left: 20px;
+   border-left: 1px solid #D1DDE8;
+}
+
+.passenger-modal__row {
+   display: grid;
+   grid-template-columns: 1fr 1fr;
+   grid-gap: 10px 20px;
+}
+
+.passenger-modal__footer {
+   padding: 20px;
+   display: flex;
+   justify-content: flex-end;
+   border-top: 1px solid #D1DDE8;
+}

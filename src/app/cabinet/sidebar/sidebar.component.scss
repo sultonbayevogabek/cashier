@@ -1,0 +1,117 @@
+.sidebar {
+   position: relative;
+   width: 250px;
+   min-height: 100vh;
+   background-color: #354356;
+   transition: all 0.2s ease-in;
+   z-index: 5;
+
+   * {
+      transition: all 0.2s ease-in;
+   }
+}
+
+.sidebar--close {
+   width: 0;
+}
+
+.sidebar__header {
+   display: flex;
+   align-items: center;
+   height: 80px;
+   background-color: #2F3C4E;
+   overflow: hidden;
+}
+
+.header__inner {
+   width: 250px;
+   padding: 0 20px;
+}
+
+.sidebar__logo {
+   height: 35px;
+}
+
+.sidebar__toggler {
+   position: absolute;
+   width: 25px;
+   right: -45px;
+   top: 31px;
+   cursor: pointer;
+}
+
+.sidebar__user {
+   padding: 24px 0;
+   background-color: #2F3C4E;
+   overflow: hidden;
+}
+
+.user__inner {
+   width: 250px;
+}
+
+.user__avatar {
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   width: 60px;
+   height: 60px;
+   margin: 0 auto 8px;
+   border-radius: 50%;
+   background: rgba(255, 255, 255, 0.15);
+}
+
+.user__name {
+   text-align: center;
+   font-weight: 600;
+   font-size: 14px;
+   color: #FFFFFF;
+}
+
+.sidebar__body {
+   overflow-x: hidden;
+   overflow-y: auto;
+   height: calc(100vh - 213px);
+   user-select: none;
+
+   &::-webkit-scrollbar {
+      display: none;
+   }
+}
+
+.sidebar__ul {
+   width: 250px;
+   margin: 0;
+   padding: 0;
+   list-style-type: none;
+}
+
+.sidebar__li {
+   display: flex;
+   align-items: center;
+   padding: 15px 20px;
+   cursor: pointer;
+
+   div {
+      width: 15px;
+      margin-right: 20px;
+      display: flex;
+      align-items: center;
+      flex-shrink: 0;
+   }
+
+   span {
+      font-weight: 600;
+      font-size: 14px;
+      line-height: 14px;
+      color: rgba(255, 255, 255, 0.7);
+   }
+
+   &:hover, &--active {
+      background-color: rgba(255, 255, 255, 0.1);
+   }
+
+   & > svg {
+      margin-left: auto;
+   }
+}

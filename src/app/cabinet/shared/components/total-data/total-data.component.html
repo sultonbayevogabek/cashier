@@ -1,0 +1,17 @@
+<div class="data-total" *ngIf="totalDataCount">
+   <div class="data-total__part">
+      Show from <span class="text-primary">{{ from }}</span> to <span class="text-primary">{{ to }}. </span> Total: <span
+      class="text-primary">{{ totalDataCount }}</span>
+   </div>
+
+   <div class="data-total__part">
+      <ngb-pagination
+         [(page)]="currentPageNumber"
+         [maxSize]="6"
+         [pageSize]="perPageDataCount"
+         [collectionSize]="totalDataCount"
+         (pageChange)="onPageChange.emit(currentPageNumber); changeRange()"
+      >
+      </ngb-pagination>
+   </div>
+</div>

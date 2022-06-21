@@ -1,0 +1,17 @@
+<div class="data-filter">
+   <div class="data-filter__part">
+      <label for="count">In one page: </label>
+      <select class="form-control" id="count" [(ngModel)]="perPageDataCount"
+              (change)="onChangePerPageDataCount.emit(perPageDataCount)">
+         <option value="10">10</option>
+         <option value="25">25</option>
+         <option value="50">50</option>
+         <option value="100">100</option>
+      </select>
+   </div>
+   <div class="data-filter__part" *ngIf="isSearchWorking">
+      <label for="search">Search: </label>
+      <input class="form-control" id="search" type="text" [(ngModel)]="searchValue"
+             (input)="onSearchValue.emit(searchValue)">
+   </div>
+</div>

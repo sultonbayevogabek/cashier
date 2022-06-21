@@ -1,0 +1,32 @@
+.header {
+   position: sticky;
+   z-index: 1;
+   top: 0;
+   display: flex;
+   align-items: center;
+   justify-content: flex-end;
+   height: 80px;
+   padding: 23px 20px;
+   background-color: #fff;
+   box-shadow: 0 4px 8px rgb(0 0 0 / 10%);
+}
+
+.header__parts {
+   display: flex;
+}
+
+.header__part {
+   display: flex;
+   align-items: center;
+   height: 34px;
+   padding-left: 20px;
+   padding-right: 20px;
+   font-weight: 600;
+   font-size: 14px;
+   color: #187CEE;
+   border-left: 1px solid #EFF0F1;
+
+   &:last-child {
+      border-right: 1px solid #EFF0F1;
+   }
+}
