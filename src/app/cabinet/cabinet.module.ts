@@ -16,7 +16,7 @@ import { TicketRefundComponent } from './ticket-refund/ticket-refund.component';
 import { TrainScheduleComponent } from './train-schedule/train-schedule.component';
 import { SettingsComponent } from './settings/settings.component';
 import { TicketReportsComponent } from './ticket-reports/ticket-reports.component';
-import { DataEntryComponent } from './data-entry/data-entry.component'
+import { DataEntryComponent } from './data-entry/data-entry.component';
 
 @NgModule({
    declarations: [

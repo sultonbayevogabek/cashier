@@ -105,6 +105,7 @@ input.form-control, select.form-control {
    &--blue-outline {
       background-color: #FFF;
       color: #187CEE;
+      border: 1px solid #187CEE;
 
       &:hover {
          color: #187CEE;
@@ -446,7 +447,7 @@ th {
    display: flex;
    justify-content: center;
    align-items: flex-start;
-   padding: 100px 20px;
+   padding: 80px 20px;
    background-color: rgba(0, 0, 0, 0.125);
    overflow: auto;
 }

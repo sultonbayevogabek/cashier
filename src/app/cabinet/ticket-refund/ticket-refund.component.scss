@@ -1,0 +1,36 @@
+.success {
+   height: calc(100vh - 180px);
+   min-height: 400px;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   flex-direction: column;
+   text-align: center;
+}
+
+.success__text {
+   padding-top: 30px;
+   font-weight: 400;
+   font-size: 30px;
+   line-height: 40px;
+}
+
+.success__price {
+   padding-top: 30px;
+
+   div:first-child {
+      font-size: 14px;
+      line-height: 19px;
+      color: #9EA7B8;
+   }
+
+   div:last-child {
+      font-weight: 600;
+      font-size: 30px;
+      line-height: 40px;
+   }
+}
+
+.success__actions {
+   padding-top: 30px;
+}
