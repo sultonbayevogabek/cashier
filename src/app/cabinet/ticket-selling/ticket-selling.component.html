@@ -8,8 +8,10 @@
             <input
                class="search-form__input--station form-control"
                type="text"
-               placeholder="Код или название станции"
+               placeholder="2900000"
+               #departureStationInput
                [(ngModel)]="departureStation"
+               [textMask]="{ mask: stationMask }"
             >
          </label>
          <label class="search-form__label search-form__label--station label">
@@ -17,8 +19,10 @@
             <input
                class="search-form__input--station form-control"
                type="text"
-               placeholder="Код или название станции"
+               placeholder="2900000"
+               #arrivalStationInput
                [(ngModel)]="arrivalStation"
+               [textMask]="{ mask: stationMask }"
             >
          </label>
          <label
