@@ -3,64 +3,100 @@
       <h2 class="app-card__heading">Продажа билетов</h2>
 
       <div class="search-form">
-         <label class="search-form__label search-form__label--station label">
-            <span>Отправление</span>
-            <input
-               class="search-form__input--station form-control"
-               type="text"
-               placeholder="2900000"
-               #departureStationInput
-               [(ngModel)]="departureStation"
-               [textMask]="{ mask: stationMask }"
-            >
-         </label>
-         <label class="search-form__label search-form__label--station label">
-            <span>Прибытие</span>
-            <input
-               class="search-form__input--station form-control"
-               type="text"
-               placeholder="2900000"
-               #arrivalStationInput
-               [(ngModel)]="arrivalStation"
-               [textMask]="{ mask: stationMask }"
-            >
-         </label>
-         <label
-            class="search-form__label label"
-            [ngClass]="{
+         <div class="search-form__field">
+            <label class="search-form__label search-form__label--station label">
+               <span>Отправление</span>
+               <input
+                  class="search-form__input--station form-control"
+                  type="text"
+                  placeholder="Код или название станции"
+                  #departureStationInput
+                  [(ngModel)]="departureStationValue"
+                  (input)="dataChange('departure')"
+                  (focusin)="departureStationInputFocus = true; arrivalStationInputFocus = false"
+               >
+            </label>
+            <ul class="search-form__dropdown" *ngIf="searchingStationList.length && departureStationInputFocus">
+               <li *ngFor="let station of searchingStationList"
+                   (click)="setStationFromSearchingStations('departure', station.nameFull, station.code)">{{ station.nameFull }}</li>
+            </ul>
+         </div>
+
+         <div class="search-form__field">
+            <label class="search-form__label search-form__label--station label">
+               <span>Прибытие</span>
+               <input
+                  class="search-form__input--station form-control"
+                  type="text"
+                  placeholder="Код или название станции"
+                  #arrivalStationInput
+                  [(ngModel)]="arrivalStationValue"
+                  (input)="dataChange('arrival')"
+                  (focusin)="arrivalStationInputFocus = true; departureStationInputFocus = false"
+               >
+            </label>
+            <ul class="search-form__dropdown" *ngIf="searchingStationList.length && arrivalStationInputFocus">
+               <li *ngFor="let station of searchingStationList"
+                   (click)="setStationFromSearchingStations('arrival', station.nameFull, station.code)">{{ station.nameFull }}</li>
+            </ul>
+         </div>
+
+         <div class="search-form__field">
+            <label
+               class="search-form__label label"
+               [ngClass]="{
                'search-form__label--chrome': isChrome
             }"
-         >
-            <span>Дата туда</span>
-            <input
-               class="search-form__input form-control"
-               type="date"
-               [(ngModel)]="forwardDate"
             >
-         </label>
-         <label
-            class="search-form__label label"
-            [ngClass]="{
+               <span>Дата туда</span>
+               <input
+                  class="search-form__input form-control"
+                  type="date"
+                  #forwardDateInput
+                  [(ngModel)]="forwardDate"
+               >
+            </label>
+         </div>
+
+         <div class="search-form__field">
+            <label
+               class="search-form__label label"
+               [ngClass]="{
                'search-form__label--chrome': isChrome
             }"
-         >
-            <span>Дата обратно</span>
-            <input
-               class="search-form__input form-control"
-               type="date"
-               [(ngModel)]="backwardDate"
             >
-         </label>
-         <label class="search-form__label search-form__label--count label">
-            <span>Кол-во</span>
-            <input
-               class="search-form__input search-form__input--count form-control"
-               type="number"
-               [(ngModel)]="passengersCount"
-            >
-         </label>
+               <span>Дата обратно</span>
+               <input
+                  class="search-form__input form-control"
+                  type="date"
+                  #backwardDateInput
+                  [(ngModel)]="backwardDate"
+               >
+            </label>
+         </div>
+
+         <div class="search-form__field">
+            <label class="search-form__label search-form__label--count label">
+               <span>Кол-во</span>
+               <input
+                  class="search-form__input search-form__input--count form-control"
+                  type="number"
+                  #passengersCountInput
+                  [(ngModel)]="passengersCount"
+               >
+            </label>
+         </div>
          <div class="pt-22">
-            <button class="search-form__submit button button--blue btn w-100">Найти</button>
+            <button (click)="getTrains()" class="search-form__submit button button--blue btn w-100">Найти</button>
+         </div>
+      </div>
+
+      <div class="popular-stations">
+         <div
+            class="popular-stations__item"
+            *ngFor="let station of popularStations"
+            (click)="setStationFromPopularStations(station.name, station.code)">
+               {{ station.name }}
          </div>
       </div>
    </div>
@@ -85,8 +121,11 @@
                            <span class="station__name">ТАШКЕНТ</span>
                         </div>
                      </div>
-                     <svg class="station__arrow" width="12" height="6" viewBox="0 0 12 6" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M0.59375 2.8125H9.89062L8.92969 1.875V0.71875L11.4297 3.3125V3.34375L8.92969 5.9375V4.78125L9.875 3.85938H0.59375V2.8125Z" fill="#354356"/>
+                     <svg class="station__arrow" width="12" height="6" viewBox="0 0 12 6" fill="none"
+                          xmlns="http://www.w3.org/2000/svg">
+                        <path
+                           d="M0.59375 2.8125H9.89062L8.92969 1.875V0.71875L11.4297 3.3125V3.34375L8.92969 5.9375V4.78125L9.875 3.85938H0.59375V2.8125Z"
+                           fill="#354356"/>
                      </svg>
                      <div class="station">
                         <div class="station__date">вт 25 май</div>
@@ -127,15 +166,30 @@
                         <strong class="car__from mini">от</strong>
                         <span class="car__price bold">1 232 000</span>
                         <span class="car__sum mini">сум</span>
-                        <svg class="car__scheme" width="35" height="18" viewBox="0 0 35 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <svg class="car__scheme" width="35" height="18" viewBox="0 0 35 18" fill="none"
+                             xmlns="http://www.w3.org/2000/svg">
                            <rect x="0.5" y="0.5" width="34" height="17" rx="2.5" fill="#EEF0F5"/>
-                           <path fill-rule="evenodd" clip-rule="evenodd" d="M5 4C4.44772 4 4 4.44772 4 5V6C4 6.55228 4.44772 7 5 7H6C6.55228 7 7 6.55228 7 6V5C7 4.44772 6.55228 4 6 4H5ZM5 11C4.44772 11 4 11.4477 4 12V13C4 13.5523 4.44772 14 5 14H6C6.55228 14 7 13.5523 7 13V12C7 11.4477 6.55228 11 6 11H5Z" fill="#187CEE"/>
-                           <path fill-rule="evenodd" clip-rule="evenodd" d="M9 4C8.44772 4 8 4.44772 8 5V6C8 6.55228 8.44772 7 9 7H10C10.5523 7 11 6.55228 11 6V5C11 4.44772 10.5523 4 10 4H9ZM9 11C8.44772 11 8 11.4477 8 12V13C8 13.5523 8.44772 14 9 14H10C10.5523 14 11 13.5523 11 13V12C11 11.4477 10.5523 11 10 11H9Z" fill="#187CEE"/>
-                           <path fill-rule="evenodd" clip-rule="evenodd" d="M13 4C12.4477 4 12 4.44772 12 5V6C12 6.55228 12.4477 7 13 7H14C14.5523 7 15 6.55228 15 6V5C15 4.44772 14.5523 4 14 4H13ZM13 11C12.4477 11 12 11.4477 12 12V13C12 13.5523 12.4477 14 13 14H14C14.5523 14 15 13.5523 15 13V12C15 11.4477 14.5523 11 14 11H13Z" fill="#187CEE"/>
-                           <path fill-rule="evenodd" clip-rule="evenodd" d="M17 4C16.4477 4 16 4.44772 16 5V6C16 6.55228 16.4477 7 17 7H18C18.5523 7 19 6.55228 19 6V5C19 4.44772 18.5523 4 18 4H17ZM17 11C16.4477 11 16 11.4477 16 12V13C16 13.5523 16.4477 14 17 14H18C18.5523 14 19 13.5523 19 13V12C19 11.4477 18.5523 11 18 11H17Z" fill="#187CEE"/>
-                           <path fill-rule="evenodd" clip-rule="evenodd" d="M21 4C20.4477 4 20 4.44772 20 5V6C20 6.55228 20.4477 7 21 7H22C22.5523 7 23 6.55228 23 6V5C23 4.44772 22.5523 4 22 4H21ZM21 11C20.4477 11 20 11.4477 20 12V13C20 13.5523 20.4477 14 21 14H22C22.5523 14 23 13.5523 23 13V12C23 11.4477 22.5523 11 22 11H21Z" fill="#187CEE"/>
-                           <path fill-rule="evenodd" clip-rule="evenodd" d="M25 4C24.4477 4 24 4.44772 24 5V6C24 6.55228 24.4477 7 25 7H26C26.5523 7 27 6.55228 27 6V5C27 4.44772 26.5523 4 26 4H25ZM25 11C24.4477 11 24 11.4477 24 12V13C24 13.5523 24.4477 14 25 14H26C26.5523 14 27 13.5523 27 13V12C27 11.4477 26.5523 11 26 11H25Z" fill="#187CEE"/>
-                           <path fill-rule="evenodd" clip-rule="evenodd" d="M29 4C28.4477 4 28 4.44772 28 5V6C28 6.55228 28.4477 7 29 7H30C30.5523 7 31 6.55228 31 6V5C31 4.44772 30.5523 4 30 4H29ZM29 11C28.4477 11 28 11.4477 28 12V13C28 13.5523 28.4477 14 29 14H30C30.5523 14 31 13.5523 31 13V12C31 11.4477 30.5523 11 30 11H29Z" fill="#187CEE"/>
+                           <path fill-rule="evenodd" clip-rule="evenodd"
+                                 d="M5 4C4.44772 4 4 4.44772 4 5V6C4 6.55228 4.44772 7 5 7H6C6.55228 7 7 6.55228 7 6V5C7 4.44772 6.55228 4 6 4H5ZM5 11C4.44772 11 4 11.4477 4 12V13C4 13.5523 4.44772 14 5 14H6C6.55228 14 7 13.5523 7 13V12C7 11.4477 6.55228 11 6 11H5Z"
+                                 fill="#187CEE"/>
+                           <path fill-rule="evenodd" clip-rule="evenodd"
+                                 d="M9 4C8.44772 4 8 4.44772 8 5V6C8 6.55228 8.44772 7 9 7H10C10.5523 7 11 6.55228 11 6V5C11 4.44772 10.5523 4 10 4H9ZM9 11C8.44772 11 8 11.4477 8 12V13C8 13.5523 8.44772 14 9 14H10C10.5523 14 11 13.5523 11 13V12C11 11.4477 10.5523 11 10 11H9Z"
+                                 fill="#187CEE"/>
+                           <path fill-rule="evenodd" clip-rule="evenodd"
+                                 d="M13 4C12.4477 4 12 4.44772 12 5V6C12 6.55228 12.4477 7 13 7H14C14.5523 7 15 6.55228 15 6V5C15 4.44772 14.5523 4 14 4H13ZM13 11C12.4477 11 12 11.4477 12 12V13C12 13.5523 12.4477 14 13 14H14C14.5523 14 15 13.5523 15 13V12C15 11.4477 14.5523 11 14 11H13Z"
+                                 fill="#187CEE"/>
+                           <path fill-rule="evenodd" clip-rule="evenodd"
+                                 d="M17 4C16.4477 4 16 4.44772 16 5V6C16 6.55228 16.4477 7 17 7H18C18.5523 7 19 6.55228 19 6V5C19 4.44772 18.5523 4 18 4H17ZM17 11C16.4477 11 16 11.4477 16 12V13C16 13.5523 16.4477 14 17 14H18C18.5523 14 19 13.5523 19 13V12C19 11.4477 18.5523 11 18 11H17Z"
+                                 fill="#187CEE"/>
+                           <path fill-rule="evenodd" clip-rule="evenodd"
+                                 d="M21 4C20.4477 4 20 4.44772 20 5V6C20 6.55228 20.4477 7 21 7H22C22.5523 7 23 6.55228 23 6V5C23 4.44772 22.5523 4 22 4H21ZM21 11C20.4477 11 20 11.4477 20 12V13C20 13.5523 20.4477 14 21 14H22C22.5523 14 23 13.5523 23 13V12C23 11.4477 22.5523 11 22 11H21Z"
+                                 fill="#187CEE"/>
+                           <path fill-rule="evenodd" clip-rule="evenodd"
+                                 d="M25 4C24.4477 4 24 4.44772 24 5V6C24 6.55228 24.4477 7 25 7H26C26.5523 7 27 6.55228 27 6V5C27 4.44772 26.5523 4 26 4H25ZM25 11C24.4477 11 24 11.4477 24 12V13C24 13.5523 24.4477 14 25 14H26C26.5523 14 27 13.5523 27 13V12C27 11.4477 26.5523 11 26 11H25Z"
+                                 fill="#187CEE"/>
+                           <path fill-rule="evenodd" clip-rule="evenodd"
+                                 d="M29 4C28.4477 4 28 4.44772 28 5V6C28 6.55228 28.4477 7 29 7H30C30.5523 7 31 6.55228 31 6V5C31 4.44772 30.5523 4 30 4H29ZM29 11C28.4477 11 28 11.4477 28 12V13C28 13.5523 28.4477 14 29 14H30C30.5523 14 31 13.5523 31 13V12C31 11.4477 30.5523 11 30 11H29Z"
+                                 fill="#187CEE"/>
                            <rect x="0.5" y="0.5" width="34" height="17" rx="2.5" stroke="#187CEE"/>
                         </svg>
                      </div>
@@ -153,15 +207,30 @@
                         <strong class="car__from mini">от</strong>
                         <span class="car__price bold">232 000</span>
                         <span class="car__sum mini">сум</span>
-                        <svg class="car__scheme" width="35" height="18" viewBox="0 0 35 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <svg class="car__scheme" width="35" height="18" viewBox="0 0 35 18" fill="none"
+                             xmlns="http://www.w3.org/2000/svg">
                            <rect x="0.5" y="0.5" width="34" height="17" rx="2.5" fill="#EEF0F5"/>
-                           <path fill-rule="evenodd" clip-rule="evenodd" d="M5 4C4.44772 4 4 4.44772 4 5V6C4 6.55228 4.44772 7 5 7H6C6.55228 7 7 6.55228 7 6V5C7 4.44772 6.55228 4 6 4H5ZM5 11C4.44772 11 4 11.4477 4 12V13C4 13.5523 4.44772 14 5 14H6C6.55228 14 7 13.5523 7 13V12C7 11.4477 6.55228 11 6 11H5Z" fill="#187CEE"/>
-                           <path fill-rule="evenodd" clip-rule="evenodd" d="M9 4C8.44772 4 8 4.44772 8 5V6C8 6.55228 8.44772 7 9 7H10C10.5523 7 11 6.55228 11 6V5C11 4.44772 10.5523 4 10 4H9ZM9 11C8.44772 11 8 11.4477 8 12V13C8 13.5523 8.44772 14 9 14H10C10.5523 14 11 13.5523 11 13V12C11 11.4477 10.5523 11 10 11H9Z" fill="#187CEE"/>
-                           <path fill-rule="evenodd" clip-rule="evenodd" d="M13 4C12.4477 4 12 4.44772 12 5V6C12 6.55228 12.4477 7 13 7H14C14.5523 7 15 6.55228 15 6V5C15 4.44772 14.5523 4 14 4H13ZM13 11C12.4477 11 12 11.4477 12 12V13C12 13.5523 12.4477 14 13 14H14C14.5523 14 15 13.5523 15 13V12C15 11.4477 14.5523 11 14 11H13Z" fill="#187CEE"/>
-                           <path fill-rule="evenodd" clip-rule="evenodd" d="M17 4C16.4477 4 16 4.44772 16 5V6C16 6.55228 16.4477 7 17 7H18C18.5523 7 19 6.55228 19 6V5C19 4.44772 18.5523 4 18 4H17ZM17 11C16.4477 11 16 11.4477 16 12V13C16 13.5523 16.4477 14 17 14H18C18.5523 14 19 13.5523 19 13V12C19 11.4477 18.5523 11 18 11H17Z" fill="#187CEE"/>
-                           <path fill-rule="evenodd" clip-rule="evenodd" d="M21 4C20.4477 4 20 4.44772 20 5V6C20 6.55228 20.4477 7 21 7H22C22.5523 7 23 6.55228 23 6V5C23 4.44772 22.5523 4 22 4H21ZM21 11C20.4477 11 20 11.4477 20 12V13C20 13.5523 20.4477 14 21 14H22C22.5523 14 23 13.5523 23 13V12C23 11.4477 22.5523 11 22 11H21Z" fill="#187CEE"/>
-                           <path fill-rule="evenodd" clip-rule="evenodd" d="M25 4C24.4477 4 24 4.44772 24 5V6C24 6.55228 24.4477 7 25 7H26C26.5523 7 27 6.55228 27 6V5C27 4.44772 26.5523 4 26 4H25ZM25 11C24.4477 11 24 11.4477 24 12V13C24 13.5523 24.4477 14 25 14H26C26.5523 14 27 13.5523 27 13V12C27 11.4477 26.5523 11 26 11H25Z" fill="#187CEE"/>
-                           <path fill-rule="evenodd" clip-rule="evenodd" d="M29 4C28.4477 4 28 4.44772 28 5V6C28 6.55228 28.4477 7 29 7H30C30.5523 7 31 6.55228 31 6V5C31 4.44772 30.5523 4 30 4H29ZM29 11C28.4477 11 28 11.4477 28 12V13C28 13.5523 28.4477 14 29 14H30C30.5523 14 31 13.5523 31 13V12C31 11.4477 30.5523 11 30 11H29Z" fill="#187CEE"/>
+                           <path fill-rule="evenodd" clip-rule="evenodd"
+                                 d="M5 4C4.44772 4 4 4.44772 4 5V6C4 6.55228 4.44772 7 5 7H6C6.55228 7 7 6.55228 7 6V5C7 4.44772 6.55228 4 6 4H5ZM5 11C4.44772 11 4 11.4477 4 12V13C4 13.5523 4.44772 14 5 14H6C6.55228 14 7 13.5523 7 13V12C7 11.4477 6.55228 11 6 11H5Z"
+                                 fill="#187CEE"/>
+                           <path fill-rule="evenodd" clip-rule="evenodd"
+                                 d="M9 4C8.44772 4 8 4.44772 8 5V6C8 6.55228 8.44772 7 9 7H10C10.5523 7 11 6.55228 11 6V5C11 4.44772 10.5523 4 10 4H9ZM9 11C8.44772 11 8 11.4477 8 12V13C8 13.5523 8.44772 14 9 14H10C10.5523 14 11 13.5523 11 13V12C11 11.4477 10.5523 11 10 11H9Z"
+                                 fill="#187CEE"/>
+                           <path fill-rule="evenodd" clip-rule="evenodd"
+                                 d="M13 4C12.4477 4 12 4.44772 12 5V6C12 6.55228 12.4477 7 13 7H14C14.5523 7 15 6.55228 15 6V5C15 4.44772 14.5523 4 14 4H13ZM13 11C12.4477 11 12 11.4477 12 12V13C12 13.5523 12.4477 14 13 14H14C14.5523 14 15 13.5523 15 13V12C15 11.4477 14.5523 11 14 11H13Z"
+                                 fill="#187CEE"/>
+                           <path fill-rule="evenodd" clip-rule="evenodd"
+                                 d="M17 4C16.4477 4 16 4.44772 16 5V6C16 6.55228 16.4477 7 17 7H18C18.5523 7 19 6.55228 19 6V5C19 4.44772 18.5523 4 18 4H17ZM17 11C16.4477 11 16 11.4477 16 12V13C16 13.5523 16.4477 14 17 14H18C18.5523 14 19 13.5523 19 13V12C19 11.4477 18.5523 11 18 11H17Z"
+                                 fill="#187CEE"/>
+                           <path fill-rule="evenodd" clip-rule="evenodd"
+                                 d="M21 4C20.4477 4 20 4.44772 20 5V6C20 6.55228 20.4477 7 21 7H22C22.5523 7 23 6.55228 23 6V5C23 4.44772 22.5523 4 22 4H21ZM21 11C20.4477 11 20 11.4477 20 12V13C20 13.5523 20.4477 14 21 14H22C22.5523 14 23 13.5523 23 13V12C23 11.4477 22.5523 11 22 11H21Z"
+                                 fill="#187CEE"/>
+                           <path fill-rule="evenodd" clip-rule="evenodd"
+                                 d="M25 4C24.4477 4 24 4.44772 24 5V6C24 6.55228 24.4477 7 25 7H26C26.5523 7 27 6.55228 27 6V5C27 4.44772 26.5523 4 26 4H25ZM25 11C24.4477 11 24 11.4477 24 12V13C24 13.5523 24.4477 14 25 14H26C26.5523 14 27 13.5523 27 13V12C27 11.4477 26.5523 11 26 11H25Z"
+                                 fill="#187CEE"/>
+                           <path fill-rule="evenodd" clip-rule="evenodd"
+                                 d="M29 4C28.4477 4 28 4.44772 28 5V6C28 6.55228 28.4477 7 29 7H30C30.5523 7 31 6.55228 31 6V5C31 4.44772 30.5523 4 30 4H29ZM29 11C28.4477 11 28 11.4477 28 12V13C28 13.5523 28.4477 14 29 14H30C30.5523 14 31 13.5523 31 13V12C31 11.4477 30.5523 11 30 11H29Z"
+                                 fill="#187CEE"/>
                            <rect x="0.5" y="0.5" width="34" height="17" rx="2.5" stroke="#187CEE"/>
                         </svg>
                      </div>
@@ -179,15 +248,30 @@
                         <strong class="car__from mini">от</strong>
                         <span class="car__price bold">232 000</span>
                         <span class="car__sum mini">сум</span>
-                        <svg class="car__scheme" width="35" height="18" viewBox="0 0 35 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <svg class="car__scheme" width="35" height="18" viewBox="0 0 35 18" fill="none"
+                             xmlns="http://www.w3.org/2000/svg">
                            <rect x="0.5" y="0.5" width="34" height="17" rx="2.5" fill="#EEF0F5"/>
-                           <path fill-rule="evenodd" clip-rule="evenodd" d="M5 4C4.44772 4 4 4.44772 4 5V6C4 6.55228 4.44772 7 5 7H6C6.55228 7 7 6.55228 7 6V5C7 4.44772 6.55228 4 6 4H5ZM5 11C4.44772 11 4 11.4477 4 12V13C4 13.5523 4.44772 14 5 14H6C6.55228 14 7 13.5523 7 13V12C7 11.4477 6.55228 11 6 11H5Z" fill="#187CEE"/>
-                           <path fill-rule="evenodd" clip-rule="evenodd" d="M9 4C8.44772 4 8 4.44772 8 5V6C8 6.55228 8.44772 7 9 7H10C10.5523 7 11 6.55228 11 6V5C11 4.44772 10.5523 4 10 4H9ZM9 11C8.44772 11 8 11.4477 8 12V13C8 13.5523 8.44772 14 9 14H10C10.5523 14 11 13.5523 11 13V12C11 11.4477 10.5523 11 10 11H9Z" fill="#187CEE"/>
-                           <path fill-rule="evenodd" clip-rule="evenodd" d="M13 4C12.4477 4 12 4.44772 12 5V6C12 6.55228 12.4477 7 13 7H14C14.5523 7 15 6.55228 15 6V5C15 4.44772 14.5523 4 14 4H13ZM13 11C12.4477 11 12 11.4477 12 12V13C12 13.5523 12.4477 14 13 14H14C14.5523 14 15 13.5523 15 13V12C15 11.4477 14.5523 11 14 11H13Z" fill="#187CEE"/>
-                           <path fill-rule="evenodd" clip-rule="evenodd" d="M17 4C16.4477 4 16 4.44772 16 5V6C16 6.55228 16.4477 7 17 7H18C18.5523 7 19 6.55228 19 6V5C19 4.44772 18.5523 4 18 4H17ZM17 11C16.4477 11 16 11.4477 16 12V13C16 13.5523 16.4477 14 17 14H18C18.5523 14 19 13.5523 19 13V12C19 11.4477 18.5523 11 18 11H17Z" fill="#187CEE"/>
-                           <path fill-rule="evenodd" clip-rule="evenodd" d="M21 4C20.4477 4 20 4.44772 20 5V6C20 6.55228 20.4477 7 21 7H22C22.5523 7 23 6.55228 23 6V5C23 4.44772 22.5523 4 22 4H21ZM21 11C20.4477 11 20 11.4477 20 12V13C20 13.5523 20.4477 14 21 14H22C22.5523 14 23 13.5523 23 13V12C23 11.4477 22.5523 11 22 11H21Z" fill="#187CEE"/>
-                           <path fill-rule="evenodd" clip-rule="evenodd" d="M25 4C24.4477 4 24 4.44772 24 5V6C24 6.55228 24.4477 7 25 7H26C26.5523 7 27 6.55228 27 6V5C27 4.44772 26.5523 4 26 4H25ZM25 11C24.4477 11 24 11.4477 24 12V13C24 13.5523 24.4477 14 25 14H26C26.5523 14 27 13.5523 27 13V12C27 11.4477 26.5523 11 26 11H25Z" fill="#187CEE"/>
-                           <path fill-rule="evenodd" clip-rule="evenodd" d="M29 4C28.4477 4 28 4.44772 28 5V6C28 6.55228 28.4477 7 29 7H30C30.5523 7 31 6.55228 31 6V5C31 4.44772 30.5523 4 30 4H29ZM29 11C28.4477 11 28 11.4477 28 12V13C28 13.5523 28.4477 14 29 14H30C30.5523 14 31 13.5523 31 13V12C31 11.4477 30.5523 11 30 11H29Z" fill="#187CEE"/>
+                           <path fill-rule="evenodd" clip-rule="evenodd"
+                                 d="M5 4C4.44772 4 4 4.44772 4 5V6C4 6.55228 4.44772 7 5 7H6C6.55228 7 7 6.55228 7 6V5C7 4.44772 6.55228 4 6 4H5ZM5 11C4.44772 11 4 11.4477 4 12V13C4 13.5523 4.44772 14 5 14H6C6.55228 14 7 13.5523 7 13V12C7 11.4477 6.55228 11 6 11H5Z"
+                                 fill="#187CEE"/>
+                           <path fill-rule="evenodd" clip-rule="evenodd"
+                                 d="M9 4C8.44772 4 8 4.44772 8 5V6C8 6.55228 8.44772 7 9 7H10C10.5523 7 11 6.55228 11 6V5C11 4.44772 10.5523 4 10 4H9ZM9 11C8.44772 11 8 11.4477 8 12V13C8 13.5523 8.44772 14 9 14H10C10.5523 14 11 13.5523 11 13V12C11 11.4477 10.5523 11 10 11H9Z"
+                                 fill="#187CEE"/>
+                           <path fill-rule="evenodd" clip-rule="evenodd"
+                                 d="M13 4C12.4477 4 12 4.44772 12 5V6C12 6.55228 12.4477 7 13 7H14C14.5523 7 15 6.55228 15 6V5C15 4.44772 14.5523 4 14 4H13ZM13 11C12.4477 11 12 11.4477 12 12V13C12 13.5523 12.4477 14 13 14H14C14.5523 14 15 13.5523 15 13V12C15 11.4477 14.5523 11 14 11H13Z"
+                                 fill="#187CEE"/>
+                           <path fill-rule="evenodd" clip-rule="evenodd"
+                                 d="M17 4C16.4477 4 16 4.44772 16 5V6C16 6.55228 16.4477 7 17 7H18C18.5523 7 19 6.55228 19 6V5C19 4.44772 18.5523 4 18 4H17ZM17 11C16.4477 11 16 11.4477 16 12V13C16 13.5523 16.4477 14 17 14H18C18.5523 14 19 13.5523 19 13V12C19 11.4477 18.5523 11 18 11H17Z"
+                                 fill="#187CEE"/>
+                           <path fill-rule="evenodd" clip-rule="evenodd"
+                                 d="M21 4C20.4477 4 20 4.44772 20 5V6C20 6.55228 20.4477 7 21 7H22C22.5523 7 23 6.55228 23 6V5C23 4.44772 22.5523 4 22 4H21ZM21 11C20.4477 11 20 11.4477 20 12V13C20 13.5523 20.4477 14 21 14H22C22.5523 14 23 13.5523 23 13V12C23 11.4477 22.5523 11 22 11H21Z"
+                                 fill="#187CEE"/>
+                           <path fill-rule="evenodd" clip-rule="evenodd"
+                                 d="M25 4C24.4477 4 24 4.44772 24 5V6C24 6.55228 24.4477 7 25 7H26C26.5523 7 27 6.55228 27 6V5C27 4.44772 26.5523 4 26 4H25ZM25 11C24.4477 11 24 11.4477 24 12V13C24 13.5523 24.4477 14 25 14H26C26.5523 14 27 13.5523 27 13V12C27 11.4477 26.5523 11 26 11H25Z"
+                                 fill="#187CEE"/>
+                           <path fill-rule="evenodd" clip-rule="evenodd"
+                                 d="M29 4C28.4477 4 28 4.44772 28 5V6C28 6.55228 28.4477 7 29 7H30C30.5523 7 31 6.55228 31 6V5C31 4.44772 30.5523 4 30 4H29ZM29 11C28.4477 11 28 11.4477 28 12V13C28 13.5523 28.4477 14 29 14H30C30.5523 14 31 13.5523 31 13V12C31 11.4477 30.5523 11 30 11H29Z"
+                                 fill="#187CEE"/>
                            <rect x="0.5" y="0.5" width="34" height="17" rx="2.5" stroke="#187CEE"/>
                         </svg>
                      </div>
@@ -209,8 +293,11 @@
                            <span class="station__name">ТАШКЕНТ</span>
                         </div>
                      </div>
-                     <svg class="station__arrow" width="12" height="6" viewBox="0 0 12 6" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M0.59375 2.8125H9.89062L8.92969 1.875V0.71875L11.4297 3.3125V3.34375L8.92969 5.9375V4.78125L9.875 3.85938H0.59375V2.8125Z" fill="#354356"/>
+                     <svg class="station__arrow" width="12" height="6" viewBox="0 0 12 6" fill="none"
+                          xmlns="http://www.w3.org/2000/svg">
+                        <path
+                           d="M0.59375 2.8125H9.89062L8.92969 1.875V0.71875L11.4297 3.3125V3.34375L8.92969 5.9375V4.78125L9.875 3.85938H0.59375V2.8125Z"
+                           fill="#354356"/>
                      </svg>
                      <div class="station">
                         <div class="station__date">вт 25 май</div>
@@ -252,8 +339,11 @@
                            <span class="station__name">ТАШКЕНТ</span>
                         </div>
                      </div>
-                     <svg class="station__arrow" width="12" height="6" viewBox="0 0 12 6" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M0.59375 2.8125H9.89062L8.92969 1.875V0.71875L11.4297 3.3125V3.34375L8.92969 5.9375V4.78125L9.875 3.85938H0.59375V2.8125Z" fill="#354356"/>
+                     <svg class="station__arrow" width="12" height="6" viewBox="0 0 12 6" fill="none"
+                          xmlns="http://www.w3.org/2000/svg">
+                        <path
+                           d="M0.59375 2.8125H9.89062L8.92969 1.875V0.71875L11.4297 3.3125V3.34375L8.92969 5.9375V4.78125L9.875 3.85938H0.59375V2.8125Z"
+                           fill="#354356"/>
                      </svg>
                      <div class="station">
                         <div class="station__date">вт 25 май</div>
@@ -295,8 +385,11 @@
                            <span class="station__name">ТАШКЕНТ</span>
                         </div>
                      </div>
-                     <svg class="station__arrow" width="12" height="6" viewBox="0 0 12 6" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M0.59375 2.8125H9.89062L8.92969 1.875V0.71875L11.4297 3.3125V3.34375L8.92969 5.9375V4.78125L9.875 3.85938H0.59375V2.8125Z" fill="#354356"/>
+                     <svg class="station__arrow" width="12" height="6" viewBox="0 0 12 6" fill="none"
+                          xmlns="http://www.w3.org/2000/svg">
+                        <path
+                           d="M0.59375 2.8125H9.89062L8.92969 1.875V0.71875L11.4297 3.3125V3.34375L8.92969 5.9375V4.78125L9.875 3.85938H0.59375V2.8125Z"
+                           fill="#354356"/>
                      </svg>
                      <div class="station">
                         <div class="station__date">вт 25 май</div>
@@ -338,8 +431,11 @@
                            <span class="station__name">ТАШКЕНТ</span>
                         </div>
                      </div>
-                     <svg class="station__arrow" width="12" height="6" viewBox="0 0 12 6" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M0.59375 2.8125H9.89062L8.92969 1.875V0.71875L11.4297 3.3125V3.34375L8.92969 5.9375V4.78125L9.875 3.85938H0.59375V2.8125Z" fill="#354356"/>
+                     <svg class="station__arrow" width="12" height="6" viewBox="0 0 12 6" fill="none"
+                          xmlns="http://www.w3.org/2000/svg">
+                        <path
+                           d="M0.59375 2.8125H9.89062L8.92969 1.875V0.71875L11.4297 3.3125V3.34375L8.92969 5.9375V4.78125L9.875 3.85938H0.59375V2.8125Z"
+                           fill="#354356"/>
                      </svg>
                      <div class="station">
                         <div class="station__date">вт 25 май</div>
@@ -461,11 +557,11 @@
                   </li>
                </ul>
             </div>
+            <img class="d-none" src="/assets/img/checked.svg" alt="">
          </div>
       </div>
    </div>
 </div>
-
 
 
 <div class="app-footer">

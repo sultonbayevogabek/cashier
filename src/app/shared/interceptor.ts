@@ -10,53 +10,47 @@ import { ToastrService } from 'ngx-toastr'
 @Injectable()
 
 export class Interceptor implements HttpInterceptor {
-  constructor(
-    private authService: AuthService,
-    private loaderService: LoaderService,
-    private router: Router,
-    private toaster: ToastrService
-  ) {}
+   constructor(
+      private authService: AuthService,
+      private loaderService: LoaderService,
+      private router: Router,
+      private toaster: ToastrService
+   ) {
+   }
 
-  intercept(request: HttpRequest<any>, next: HttpHandler) {
-    let requestHeaders = new HttpHeaders({
-      'Content-Type': 'application/json',
-      'Accept': 'application/json'
-    })
-
-    const token = this.authService.getToken()
-    if (token && request.url !== environment.host + '/api/v1/auth/login') {
-      requestHeaders = requestHeaders.append('Authorization', 'Bearer ' + token)
-    }
-
-    let authRequest = request.clone({
-      headers: requestHeaders
-    })
-
-    if (request.url.includes('/pdf') || request.url.includes('Pdf')) {
-      requestHeaders = requestHeaders.append('Accept', 'application/octet-stream')
-      authRequest = request.clone({
-        responseType: 'blob' as 'json',
-        headers: requestHeaders
+   intercept(request: HttpRequest<any>, next: HttpHandler) {
+      let requestHeaders = new HttpHeaders({
+         'Content-Type': 'application/json',
+         'Accept': 'application/json',
+         'Accept-Language': 'ru'
       })
-    }
 
-    this.loaderService.showLoader()
-
-    return next.handle(authRequest).pipe(catchError(err => {
-      if (err.status === 401 || err.status === 0) {
-        if (!request.url.includes('/login')) {
-          this.toaster.error('Please login!')
-        }
-
-        this.router.navigate(['login']).then()
+      const token = this.authService.getToken()
+      if (token && request.url !== environment.host + '/api/v1/auth/login') {
+         requestHeaders = requestHeaders.append('Authorization', 'Bearer ' + token)
       }
-      this.loaderService.hideLoader()
-      return observableThrowError(() => err)
-    })).pipe(map((event: HttpEvent<any>) => {
-      if (event instanceof HttpResponse) {
-        this.loaderService.hideLoader()
-      }
-      return event
-    }))
-  }
+
+      let authRequest = request.clone({
+         headers: requestHeaders
+      })
+
+      this.loaderService.showLoader()
+
+      return next.handle(authRequest).pipe(catchError(err => {
+         if (err.status === 401 || err.status === 0) {
+            if (!request.url.includes('/login')) {
+               this.toaster.error('Please login!')
+            }
+
+            this.router.navigate(['login']).then()
+         }
+         this.loaderService.hideLoader()
+         return observableThrowError(() => err)
+      })).pipe(map((event: HttpEvent<any>) => {
+         if (event instanceof HttpResponse) {
+            this.loaderService.hideLoader()
+         }
+         return event
+      }))
+   }
 }

@@ -22,20 +22,45 @@ export class AuthService {
    }
 
    getToken(): string | null {
-      return sessionStorage.getItem('token')
+      return localStorage.getItem('token')
    }
 
    login(username: string, password: string) {
-      if (username === 'sultonbayevogabek@gmail.com' && password === 'Ogabek19991031') {
-         sessionStorage.setItem('username', 'sultonbayevogabek@gmail.com')
-         sessionStorage.setItem('role', 'cashier')
-         this.router.navigate(['/cabinet/ticket-selling']).then()
-      } else {
-         this.toasterService.error('Логин или пароль неверно!')
-      }
+      this.http.post(environment.host + '/api/v1/auth/login', { username, password }).subscribe((res: any) => {
+         if (res.roles.includes('SUPER_ADMIN')) {
+            localStorage.setItem('token', res.token)
+            this.router.navigate(['/cabinet/ticket-selling'])
+            return
+         }
+         this.toasterService.error('Логин или пароль неверный')
+      }, _ => {
+         this.toasterService.error('Логин или пароль неверный')
+      })
    }
 
-   isCashier(): boolean {
-      return sessionStorage.getItem('role') === 'cashier'
+   getRoles(): string {
+      if (this.getToken()) {
+         try {
+            return JWT.decodeToken(this.getToken() || '').role
+         } catch (e) {
+            return ''
+         }
+      }
+      return ''
+   }
+
+   getUsername(): string {
+      if (this.getToken()) {
+         try {
+            return JWT.decodeToken(this.getToken() || '').sub
+         } catch (e) {
+            return ''
+         }
+      }
+      return ''
+   }
+
+   isSuperAdmin(): boolean {
+      return this.getRoles().includes('SUPER_ADMIN')
    }
 }

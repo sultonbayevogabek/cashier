@@ -12,7 +12,16 @@ import { ToastrService } from 'ngx-toastr'
 })
 
 export class LoginComponent implements OnInit {
-   public loginForm: FormGroup
+   public loginForm: FormGroup = new FormGroup({
+      username: new FormControl('', [
+         Validators.email,
+         Validators.required
+      ]),
+      password: new FormControl('', [
+         Validators.minLength(5),
+         Validators.required
+      ])
+   })
    public loading = false
 
    constructor(
@@ -22,21 +31,10 @@ export class LoginComponent implements OnInit {
       private toaster: ToastrService
    ) {
       this.title.setTitle('Войти в систему')
-
-      this.loginForm = new FormGroup({
-         username: new FormControl('', [
-            Validators.email,
-            Validators.required
-         ]),
-         password: new FormControl('', [
-            Validators.minLength(5),
-            Validators.required
-         ])
-      })
    }
 
    ngOnInit(): void {
-      sessionStorage.clear()
+      localStorage.removeItem('token')
    }
 
    loginFormSubmit() {

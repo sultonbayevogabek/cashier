@@ -5,6 +5,15 @@
    padding-top: 10px;
 }
 
+.search-form__field {
+   position: relative;
+}
+
+.search-form__label {
+   display: block;
+   width: 100%;
+}
+
 .search-form__label--station {
    position: relative;
 
@@ -61,6 +70,69 @@
    font-weight: 600;
    font-size: 14px;
    line-height: 20px;
+}
+
+.search-form__dropdown {
+   position: absolute;
+   top: 70px;
+   left: 0;
+   right: 0;
+   list-style-type: none;
+   padding: 0;
+   border-radius: 5px;
+   background-color: #FFFFFF;
+   z-index: 2;
+   max-height: 229px;
+   overflow: auto;
+   scrollbar-color: #D1DDE8 #ffffff;
+   scrollbar-width: thin;
+   box-shadow: 0 0 15px rgba(#D1DDE8, 0.6);
+
+   li {
+      padding: 7px 14px;
+      font-size: 14px;
+      line-height: 20px;
+      cursor: pointer;
+
+      &:hover {
+         background-color: #F6F7FB;
+      }
+
+      &:not(:last-child) {
+         margin-bottom: 5px;
+      }
+   }
+
+   &::-webkit-scrollbar {
+      width: 10px;
+   }
+
+   &::-webkit-scrollbar-track {
+      background-color: #FFFFFF;
+      border-radius: 5px;
+   }
+
+   &::-webkit-scrollbar-thumb {
+      background-color: #D1DDE8;
+      border-radius: 5px;
+   }
+}
+
+.popular-stations {
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   flex-wrap: wrap;
+   padding-top: 15px;
+}
+
+.popular-stations__item {
+   margin: 0 10px;
+   font-size: 14px;
+   line-height: 14px;
+   color: #187CEE;
+   cursor: pointer;
+   text-transform: uppercase;
 }
 
 .trains {

@@ -12,5 +12,20 @@ export class ApiService {
    constructor(
       private http: HttpClient,
       private toaster: ToastrService
-   ) {}
+   ) {
+   }
+
+   searchStation(nameFull: string): Observable<any> {
+      return this.http.post<any>(environment.host + '/api/v1/stations/list', { nameFull })
+   }
+
+   getTrainsListApi(searchingData: any): Observable<any> {
+      return this.http.post<any>(environment.host + '/api/v1/trains/availability/space/between/stations', {
+         ...searchingData, showWithoutPlaces: 0
+      })
+   }
+
+   getPassportDataApi(): Observable<any> {
+      return this.http.get('/mrz')
+   }
 }

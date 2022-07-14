@@ -25,4 +25,8 @@ export class DatesService {
    getFirstDayOfYear(): string {
       return `${new Date().getFullYear()}-01-01`
    }
+
+   formatDateWithDot(date: string): string {
+      return `${date.substring(8)}.${date.substring(5, 7)}.${date.substring(0, 4)}`
+   }
 }

@@ -16,7 +16,7 @@ export class CashierGuard implements CanActivate, CanActivateChild {
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot
   ): Observable<boolean> | Promise<boolean> | boolean {
-    if (this.authService.isCashier()) {
+    if (this.authService.isSuperAdmin()) {
       return true
     } else {
       return this.router.navigate(['/login'])

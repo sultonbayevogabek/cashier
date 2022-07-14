@@ -66,7 +66,7 @@
       </div>
 
       <div class="passengers">
-         <table class="passengers__table table">
+         <table class="passengers__table table table-bordered">
             <thead>
             <tr>
                <th>№</th>
@@ -150,7 +150,7 @@
       <div class="passenger-modal__body">
          <div class="passenger-modal__passport">
             <img src="/assets/img/passport.png" alt="">
-            <button class="button button--blue btn">Сканировать документ</button>
+            <button class="button button--blue btn" (click)="scanDocument()">Сканировать документ</button>
          </div>
          <form class="passenger-modal__form">
             <div class="passenger-modal__row">
@@ -203,8 +203,7 @@
                <label class="label">
                   <span>Страна выдачи документа</span>
                   <select class="form-control">
-                     <option value="">Узбекистан</option>
-                     <option value="">Россия</option>
+                     <option *ngFor="let country of countries" value="{{ country.passportCode }}">{{ country.countryName }}</option>
                   </select>
                </label>
             </div>

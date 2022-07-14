@@ -83,6 +83,14 @@ input.form-control, select.form-control {
    background-color: #F6F7FB;
    font-size: 14px;
    line-height: 14px;
+
+   &:focus {
+      color: #354356;
+      background-color: #ffffff;
+      border-color: #D1DDE8;
+      outline: 0;
+      box-shadow: 0 0 0 0.25rem #F6F7FB;
+   }
 }
 
 .button {
