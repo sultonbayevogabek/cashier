@@ -13,7 +13,7 @@
                   #departureStationInput
                   [(ngModel)]="departureStationValue"
                   (input)="dataChange('departure')"
-                  (focusin)="departureStationInputFocus = true; arrivalStationInputFocus = false"
+                  (focusin)="departureStationInputFocus = true; arrivalStationInputFocus = false; searchingStationList = []"
                >
             </label>
             <ul class="search-form__dropdown" *ngIf="searchingStationList.length && departureStationInputFocus">
@@ -32,7 +32,7 @@
                   #arrivalStationInput
                   [(ngModel)]="arrivalStationValue"
                   (input)="dataChange('arrival')"
-                  (focusin)="arrivalStationInputFocus = true; departureStationInputFocus = false"
+                  (focusin)="arrivalStationInputFocus = true; departureStationInputFocus = false; searchingStationList = []"
                >
             </label>
             <ul class="search-form__dropdown" *ngIf="searchingStationList.length && arrivalStationInputFocus">

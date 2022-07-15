@@ -1,4 +1,6 @@
 import { Component, OnInit } from '@angular/core'
+import { FormControl, FormGroup, Validators } from '@angular/forms'
+import { ToastrService } from 'ngx-toastr'
 import { ApiService } from 'src/app/shared/services/api.service'
 
 @Component({
@@ -11,16 +13,16 @@ export class DataEntryComponent implements OnInit {
    public isModalOpen = false
    public countries = [
       {
-         'countryName': 'Узбекистан',
-         'passportCode': 'UZB'
-      },
-      {
          'countryName': 'Россия',
          'passportCode': 'RUS'
       },
       {
          'countryName': 'Афганистан',
          'passportCode': 'AFG'
+      },
+      {
+         'countryName': 'Узбекистан',
+         'passportCode': 'UZB'
       },
       {
          'countryName': 'Албания',
@@ -935,9 +937,19 @@ export class DataEntryComponent implements OnInit {
          'passportCode': 'ZWE'
       }
    ]
+   public passengerDataForm: FormGroup = new FormGroup({
+      lastName: new FormControl('', [Validators.required]),
+      firstName: new FormControl('', [Validators.required]),
+      middleName: new FormControl(''),
+      birthDate: new FormControl('', [Validators.required]),
+      sex: new FormControl('M', [Validators.required]),
+      document: new FormControl('', [Validators.required]),
+      country: new FormControl('UZB', [Validators.required]),
+   })
 
    constructor(
-      private apiService: ApiService
+      private apiService: ApiService,
+      private toaster: ToastrService
    ) {}
 
    ngOnInit(): void {
@@ -950,7 +962,44 @@ export class DataEntryComponent implements OnInit {
 
    scanDocument() {
       this.apiService.getPassportDataApi().subscribe(res => {
-         console.log(res)
+         this.passengerDataForm.setValue({
+            lastName: res.last_name.trim().toUpperCase(),
+            firstName: res.first_name.trim().toUpperCase(),
+            middleName: '',
+            birthDate: res.dob,
+            sex: res.sex,
+            document: res.passport_no.trim().toUpperCase(),
+            country: res.citizenship
+         })
+      }, err => {
+         console.log(err)
+         if (err.error.message === 'camera not found') {
+            this.toaster.warning('Камера не найдена')
+            return
+         }
+
+         if (err.error.message === 'passport not found') {
+            this.toaster.warning('Паспорт не найден')
+            return
+         }
+
+         if (err.error.message === 'could not read passport') {
+            this.toaster.warning('Паспорт error')
+            return
+         }
+      })
+   }
+
+   closePassengerDataModal() {
+      this.isModalOpen = false
+      this.passengerDataForm.setValue({
+         lastName: '',
+         firstName: '',
+         middleName: '',
+         birthDate: '',
+         sex: 'M',
+         document: '',
+         country: 'UZB'
       })
    }
 }

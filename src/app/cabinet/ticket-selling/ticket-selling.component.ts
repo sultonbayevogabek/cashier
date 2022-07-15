@@ -73,7 +73,7 @@ export class TicketSellingComponent implements OnInit {
 
       if (inputType === 'departure' && !removeNonNumerics(this.departureStationValue).length) {
          this.departureStationCode = ''
-         if (!this.departureStationValue.trim().length) {
+         if (this.departureStationValue.trim().length < 3) {
             this.searchingStationList = []
             return
          }
@@ -91,7 +91,7 @@ export class TicketSellingComponent implements OnInit {
 
       if (inputType === 'arrival' && !removeNonNumerics(this.arrivalStationValue).length) {
          this.arrivalStationCode = ''
-         if (!this.arrivalStationValue.trim().length) {
+         if (this.arrivalStationValue.trim().length < 3) {
             this.searchingStationList = []
             return
          }
@@ -117,14 +117,40 @@ export class TicketSellingComponent implements OnInit {
       }
    }
 
+   setStationFromPopularStations(name: string, code: string) {
+      this.arrivalStationInputFocus = this.departureStationInputFocus = false
+      this.searchingStationList = []
+
+      if (this.departureStationCode.length === 7 && this.arrivalStationCode.length === 7) {
+         this.arrivalStationValue = ''
+         this.arrivalStationCode = ''
+         this.departureStationValue = name
+         this.departureStationCode = code
+         return
+      }
+
+      if (this.departureStationCode.length !== 7) {
+         this.departureStationValue = name
+         this.departureStationCode = code
+         return
+      }
+
+      if (this.arrivalStationCode.length !== 7) {
+         this.arrivalStationValue = name
+         this.arrivalStationCode = code
+         this.forwardDateInput.nativeElement.focus()
+         return
+      }
+   }
+
    getTrains() {
-      if (removeNonNumerics(this.departureStationCode).length < 7) {
+      if (this.departureStationCode.length !== 7) {
          this.toasterService.warning('Введите код станции отправления')
          this.departureStationInput.nativeElement.focus()
          return
       }
 
-      if (removeNonNumerics(this.arrivalStationCode).length < 7) {
+      if (this.arrivalStationCode.length !== 7) {
          this.toasterService.warning('Введите код станции прибытия')
          this.arrivalStationInput.nativeElement.focus()
          return
@@ -142,8 +168,8 @@ export class TicketSellingComponent implements OnInit {
          return
       }
 
-      if (this.passengersCount <= 0) {
-         this.toasterService.warning('Введите количество пассажиров')
+      if (this.passengersCount < 1 || this.passengersCount > 4) {
+         this.toasterService.warning('Введите количество пассажиров от 1 до 4')
          this.passengersCountInput.nativeElement.focus()
          return
       }
@@ -171,31 +197,5 @@ export class TicketSellingComponent implements OnInit {
       this.apiService.getTrainsListApi(searchingData).subscribe(res => {
          console.log(res)
       })
-   }
-
-   setStationFromPopularStations(name: string, code: string) {
-      this.arrivalStationInputFocus = this.departureStationInputFocus = false
-      this.searchingStationList = []
-
-      if (this.departureStationCode.length === 7 && this.arrivalStationCode.length === 7) {
-         this.arrivalStationValue = ''
-         this.arrivalStationCode = ''
-         this.departureStationValue = name
-         this.departureStationCode = code
-         return
-      }
-
-      if (this.departureStationCode.length !== 7) {
-         this.departureStationValue = name
-         this.departureStationCode = code
-         return
-      }
-
-      if (this.arrivalStationCode.length !== 7) {
-         this.arrivalStationValue = name
-         this.arrivalStationCode = code
-         this.forwardDateInput.nativeElement.focus()
-         return
-      }
    }
 }

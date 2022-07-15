@@ -152,7 +152,7 @@
             <img src="/assets/img/passport.png" alt="">
             <button class="button button--blue btn" (click)="scanDocument()">Сканировать документ</button>
          </div>
-         <form class="passenger-modal__form">
+         <form class="passenger-modal__form" [formGroup]="passengerDataForm">
             <div class="passenger-modal__row">
                <label class="label">
                   <span>Фамилия</span>
@@ -160,6 +160,7 @@
                      class="form-control"
                      type="text"
                      placeholder="Фамилия"
+                     formControlName="lastName"
                   >
                </label>
                <label class="label">
@@ -168,14 +169,16 @@
                      class="form-control"
                      type="text"
                      placeholder="Имя"
+                     formControlName="firstName"
                   >
                </label>
                <label class="label">
-                  <span>Отчество</span>
+                  <span>Отчество (не обязательное поле)</span>
                   <input
                      class="form-control"
                      type="text"
                      placeholder="Отчество"
+                     formControlName="middleName"
                   >
                </label>
                <label class="label">
@@ -183,13 +186,14 @@
                   <input
                      class="form-control"
                      type="date"
+                     formControlName="birthDate"
                   >
                </label>
                <label class="label">
                   <span>Пол</span>
-                  <select class="form-control">
-                     <option value="М">Мужчина</option>
-                     <option value="Ж">Женщина</option>
+                  <select class="form-control" formControlName="sex">
+                     <option value="M">Мужчина</option>
+                     <option value="F">Женщина</option>
                   </select>
                </label>
                <label class="label">
@@ -198,11 +202,12 @@
                      class="form-control"
                      type="text"
                      placeholder="Серия и номер документа"
+                     formControlName="document"
                   >
                </label>
                <label class="label">
                   <span>Страна выдачи документа</span>
-                  <select class="form-control">
+                  <select class="form-control" formControlName="country">
                      <option *ngFor="let country of countries" value="{{ country.passportCode }}">{{ country.countryName }}</option>
                   </select>
                </label>
@@ -211,8 +216,8 @@
       </div>
 
       <div class="passenger-modal__footer">
-         <button class="button button--red btn mr-20" (click)="isModalOpen = false">Отменить</button>
-         <button class="button button--blue btn">Добавить</button>
+         <button class="button button--red btn mr-20" (click)="closePassengerDataModal()">Отменить</button>
+         <button class="button button--blue btn" [disabled]="passengerDataForm.invalid">Добавить</button>
       </div>
    </div>
 </div>
