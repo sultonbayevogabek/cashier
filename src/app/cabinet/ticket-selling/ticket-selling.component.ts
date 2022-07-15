@@ -12,6 +12,7 @@ import { ApiService } from 'src/app/shared/services/api.service'
 })
 
 export class TicketSellingComponent implements OnInit {
+   /* SEARCH PANEL */
    public isChrome = true
 
    public departureStationCode = ''
@@ -47,6 +48,12 @@ export class TicketSellingComponent implements OnInit {
    @ViewChild('backwardDateInput', { static: true }) backwardDateInput: any
    @ViewChild('passengersCountInput', { static: true }) passengersCountInput: any
 
+   /* TRAINS LIST */
+   public forwardTrains: Array<any> = []
+   public backwardTrains: Array<any> = []
+   public passRouteForward: any
+   public passRouteBackward: any
+
    constructor(
       public dateService: DatesService,
       private title: Title,
@@ -63,6 +70,7 @@ export class TicketSellingComponent implements OnInit {
       this.departureStationInput.nativeElement.focus()
    }
 
+   /* SEARCH PANEL */
    dataChange(inputType: string): void {
       if (inputType === 'departure' && removeNonNumerics(this.departureStationValue).length) {
          this.departureStationCode = removeNonNumerics(this.departureStationValue)
@@ -195,7 +203,31 @@ export class TicketSellingComponent implements OnInit {
       }
 
       this.apiService.getTrainsListApi(searchingData).subscribe(res => {
-         console.log(res)
+         if (res.express.direction[0].trains[0].train.length) {
+            this.forwardTrains = res.express.direction[0].trains[0].train
+            this.passRouteForward = res.express.direction[0].passRoute
+         }
+
+         if (res.express.direction[1]?.trains[0].train.length) {
+            this.backwardTrains = res.express.direction[1].trains[0].train
+            this.passRouteBackward = res.express.direction[1].passRoute
+         }
+
+         console.log(this.forwardTrains)
       })
+   }
+
+   /* TRAINS LIST */
+   calculateCarTypesAndPrices(carTypes: any): Array<any> {
+      carTypes.forEach((carType: any) => {
+         carType.prices = []
+         carType.tariffs.tariff.forEach((item: any) => {
+            const price = parseInt(item.tariff) + parseInt(item.comissionFee)
+            if (!carType.prices.includes(price)) {
+               carType.prices.push(price)
+            }
+         })
+      })
+      return carTypes
    }
 }
