@@ -107,7 +107,7 @@
             <h2 class="list__heading">Найдено {{ forwardTrains.length }} вариантов для туда</h2>
 
             <ul class="list__ul">
-               <li class="list__item train" *ngFor="let train of forwardTrains">
+               <li class="list__item train" *ngFor="let train of forwardTrains; let i = index">
                   <div class="train__header">
                      <div class="train__info">
                         <strong>{{ train.number }} ({{ train.type }}) {{ train.brand ? '(' + train.brand + ')' : null }}</strong>
@@ -136,139 +136,80 @@
                            </div>
                         </div>
                      </div>
+
+                     <div class="train__time-in-way">
+                        <span>В пути</span>
+                        <strong>{{ train.timeInWay }}</strong>
+                     </div>
                   </div>
 
                   <div class="train__car-types">
-                     <div class="car-type" *ngFor="let carType of calculateCarTypesAndPrices(train.places.cars)">
+                     <div
+                        class="car-type car-type--forward"
+                        *ngFor="let carType of calculateCarTypesAndPrices(train.places.cars)"
+                        (click)="getAvailablePlaces(train.number, 'Forward', carType.type, i)"
+                     >
                         {{ carType.type }} <strong>{{ carType.freeSeats }}</strong> от
-                        <ng-container *ngFor="let price of carType.prices"><strong>{{ price | number }}, </strong></ng-container> сум
+                        <strong>{{ carType.prices.join(', ') }} </strong> сум
                      </div>
                   </div>
 
-                  <div class="train__cars cars">
-                     <div class="car">
-                        <div class="car__item">
-                           <strong class="car__number bold">12</strong>
-                           <span class="car__wagon mini">Вагон</span>
-                           <span class="car__type normal">Купе</span>
+                  <div class="train__cars cars" *ngIf="forwardAvailableCarTypes.length && train.showCars">
+                     <ng-container *ngFor="let carType of forwardAvailableCarTypes">
+                        <div class="car" *ngFor="let car of carType.car">
+                           <div class="car__item">
+                              <strong class="car__number bold">{{ car.number }}</strong>
+                              <span class="car__wagon mini">Вагон</span>
+                              <span class="car__type normal">{{ carType.type }}</span>
+                           </div>
+                           <div class="car__item">
+                              <strong class="car__seats bold">{{ getFreeSeatsCount(car.places) }}</strong>
+                           </div>
+                           <div class="car__item">
+                              <strong class="car__from mini">от</strong>
+                              <span class="car__price bold">{{ carType.tariff }}</span>
+                              <span class="car__sum mini">сум</span>
+                              <span class="car__conditioner car__conditioner--with" title="с кондиционером" *ngIf="carType.classService.service.conditioner">
+                                 <svg width="16" height="18" viewBox="0 0 16 18" fill="#187CEE" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M7.25117 17.5078V15.1312L5.99258 15.8766L5.37734 15.4898V14.6531L7.25117 13.5316V11.9672L5.75 12.8883V11.2324L4.24883 12.0164V14.2629L3.63008 14.7234L3.12383 14.3086V12.8039L1.03203 13.9746L0.125 13.602V12.6527L2.25547 11.4645L0.873828 10.7824V9.91406L1.66836 9.49219L3.62305 10.6418L4.97656 9.86133L4.94492 9.83672L3.57031 9.04219L4.90977 8.20547L3.5668 7.425L1.61211 8.57109L0.870313 8.20898V7.34414L2.19922 6.60234L0.125 5.44922V4.5L0.996875 4.08164L3.12734 5.28047V3.75117L3.68281 3.3293L4.41055 3.77227L4.38945 6.06094L5.76758 6.85547L5.78164 5.23828L7.25117 6.02578V4.46484L5.37734 3.34336V2.51719L5.99258 2.12344L7.25117 2.86875V0.495703L7.99648 0L8.74883 0.495703V2.86875L10.2148 2.10938L10.9988 2.56641V3.31523L8.74883 4.47187V6.03281L10.25 5.18203V6.88359L11.7512 6.10313V3.65625L12.2961 3.33281L12.8762 3.65625V5.21719L15.0664 4.06406L15.875 4.52109V5.40703L13.8148 6.59531L15.1262 7.32656V8.17031L14.4406 8.54297L12.4437 7.3582L11.0656 8.23711L12.398 9.07383L11.027 9.86836L12.4402 10.6172L14.4617 9.4957L15.1297 9.95273V10.7578L13.8852 11.4645L15.8785 12.6527V13.5879L14.9328 13.9781L12.8797 12.8566V14.3402L12.3066 14.7305L11.7512 14.3367V12.0867L10.25 11.257V12.8215L8.74883 11.9707V13.5352L10.6227 14.6566V15.5391L10.0039 15.8766L8.74531 15.1312V17.5078L7.99297 18L7.25117 17.5078ZM6.69922 9.03516L7.40586 10.125H8.72422L9.32891 9.03516L8.68906 7.875H7.3707L6.69922 9.03516Z"
+                                          fill="'#187CEE"/>
+                                 </svg>
+                              </span>
+                              <span class="car__conditioner car__conditioner--without" title="без кондиционера" *ngIf="!carType.classService.service.conditioner">
+                                 <svg width="16" height="18" viewBox="0 0 16 18" fill="#DDE0ED" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M7.25117 17.5078V15.1312L5.99258 15.8766L5.37734 15.4898V14.6531L7.25117 13.5316V11.9672L5.75 12.8883V11.2324L4.24883 12.0164V14.2629L3.63008 14.7234L3.12383 14.3086V12.8039L1.03203 13.9746L0.125 13.602V12.6527L2.25547 11.4645L0.873828 10.7824V9.91406L1.66836 9.49219L3.62305 10.6418L4.97656 9.86133L4.94492 9.83672L3.57031 9.04219L4.90977 8.20547L3.5668 7.425L1.61211 8.57109L0.870313 8.20898V7.34414L2.19922 6.60234L0.125 5.44922V4.5L0.996875 4.08164L3.12734 5.28047V3.75117L3.68281 3.3293L4.41055 3.77227L4.38945 6.06094L5.76758 6.85547L5.78164 5.23828L7.25117 6.02578V4.46484L5.37734 3.34336V2.51719L5.99258 2.12344L7.25117 2.86875V0.495703L7.99648 0L8.74883 0.495703V2.86875L10.2148 2.10938L10.9988 2.56641V3.31523L8.74883 4.47187V6.03281L10.25 5.18203V6.88359L11.7512 6.10313V3.65625L12.2961 3.33281L12.8762 3.65625V5.21719L15.0664 4.06406L15.875 4.52109V5.40703L13.8148 6.59531L15.1262 7.32656V8.17031L14.4406 8.54297L12.4437 7.3582L11.0656 8.23711L12.398 9.07383L11.027 9.86836L12.4402 10.6172L14.4617 9.4957L15.1297 9.95273V10.7578L13.8852 11.4645L15.8785 12.6527V13.5879L14.9328 13.9781L12.8797 12.8566V14.3402L12.3066 14.7305L11.7512 14.3367V12.0867L10.25 11.257V12.8215L8.74883 11.9707V13.5352L10.6227 14.6566V15.5391L10.0039 15.8766L8.74531 15.1312V17.5078L7.99297 18L7.25117 17.5078ZM6.69922 9.03516L7.40586 10.125H8.72422L9.32891 9.03516L8.68906 7.875H7.3707L6.69922 9.03516Z"
+                                          fill="'#DDE0ED"/>
+                                 </svg>
+                              </span>
+                              <svg class="car__scheme" width="35" height="18" viewBox="0 0 35 18" fill="none"
+                                   xmlns="http://www.w3.org/2000/svg">
+                                 <rect x="0.5" y="0.5" width="34" height="17" rx="2.5" fill="#EEF0F5"/>
+                                 <path fill-rule="evenodd" clip-rule="evenodd"
+                                       d="M5 4C4.44772 4 4 4.44772 4 5V6C4 6.55228 4.44772 7 5 7H6C6.55228 7 7 6.55228 7 6V5C7 4.44772 6.55228 4 6 4H5ZM5 11C4.44772 11 4 11.4477 4 12V13C4 13.5523 4.44772 14 5 14H6C6.55228 14 7 13.5523 7 13V12C7 11.4477 6.55228 11 6 11H5Z"
+                                       fill="#187CEE"/>
+                                 <path fill-rule="evenodd" clip-rule="evenodd"
+                                       d="M9 4C8.44772 4 8 4.44772 8 5V6C8 6.55228 8.44772 7 9 7H10C10.5523 7 11 6.55228 11 6V5C11 4.44772 10.5523 4 10 4H9ZM9 11C8.44772 11 8 11.4477 8 12V13C8 13.5523 8.44772 14 9 14H10C10.5523 14 11 13.5523 11 13V12C11 11.4477 10.5523 11 10 11H9Z"
+                                       fill="#187CEE"/>
+                                 <path fill-rule="evenodd" clip-rule="evenodd"
+                                       d="M13 4C12.4477 4 12 4.44772 12 5V6C12 6.55228 12.4477 7 13 7H14C14.5523 7 15 6.55228 15 6V5C15 4.44772 14.5523 4 14 4H13ZM13 11C12.4477 11 12 11.4477 12 12V13C12 13.5523 12.4477 14 13 14H14C14.5523 14 15 13.5523 15 13V12C15 11.4477 14.5523 11 14 11H13Z"
+                                       fill="#187CEE"/>
+                                 <path fill-rule="evenodd" clip-rule="evenodd"
+                                       d="M17 4C16.4477 4 16 4.44772 16 5V6C16 6.55228 16.4477 7 17 7H18C18.5523 7 19 6.55228 19 6V5C19 4.44772 18.5523 4 18 4H17ZM17 11C16.4477 11 16 11.4477 16 12V13C16 13.5523 16.4477 14 17 14H18C18.5523 14 19 13.5523 19 13V12C19 11.4477 18.5523 11 18 11H17Z"
+                                       fill="#187CEE"/>
+                                 <path fill-rule="evenodd" clip-rule="evenodd"
+                                       d="M21 4C20.4477 4 20 4.44772 20 5V6C20 6.55228 20.4477 7 21 7H22C22.5523 7 23 6.55228 23 6V5C23 4.44772 22.5523 4 22 4H21ZM21 11C20.4477 11 20 11.4477 20 12V13C20 13.5523 20.4477 14 21 14H22C22.5523 14 23 13.5523 23 13V12C23 11.4477 22.5523 11 22 11H21Z"
+                                       fill="#187CEE"/>
+                                 <path fill-rule="evenodd" clip-rule="evenodd"
+                                       d="M25 4C24.4477 4 24 4.44772 24 5V6C24 6.55228 24.4477 7 25 7H26C26.5523 7 27 6.55228 27 6V5C27 4.44772 26.5523 4 26 4H25ZM25 11C24.4477 11 24 11.4477 24 12V13C24 13.5523 24.4477 14 25 14H26C26.5523 14 27 13.5523 27 13V12C27 11.4477 26.5523 11 26 11H25Z"
+                                       fill="#187CEE"/>
+                                 <path fill-rule="evenodd" clip-rule="evenodd"
+                                       d="M29 4C28.4477 4 28 4.44772 28 5V6C28 6.55228 28.4477 7 29 7H30C30.5523 7 31 6.55228 31 6V5C31 4.44772 30.5523 4 30 4H29ZM29 11C28.4477 11 28 11.4477 28 12V13C28 13.5523 28.4477 14 29 14H30C30.5523 14 31 13.5523 31 13V12C31 11.4477 30.5523 11 30 11H29Z"
+                                       fill="#187CEE"/>
+                                 <rect x="0.5" y="0.5" width="34" height="17" rx="2.5" stroke="#187CEE"/>
+                              </svg>
+                           </div>
                         </div>
-                        <div class="car__item">
-                           <strong class="car__seats bold">3</strong>
-                        </div>
-                        <div class="car__item">
-                           <strong class="car__from mini">от</strong>
-                           <span class="car__price bold">1 232 000</span>
-                           <span class="car__sum mini">сум</span>
-                           <svg class="car__scheme" width="35" height="18" viewBox="0 0 35 18" fill="none"
-                                xmlns="http://www.w3.org/2000/svg">
-                              <rect x="0.5" y="0.5" width="34" height="17" rx="2.5" fill="#EEF0F5"/>
-                              <path fill-rule="evenodd" clip-rule="evenodd"
-                                    d="M5 4C4.44772 4 4 4.44772 4 5V6C4 6.55228 4.44772 7 5 7H6C6.55228 7 7 6.55228 7 6V5C7 4.44772 6.55228 4 6 4H5ZM5 11C4.44772 11 4 11.4477 4 12V13C4 13.5523 4.44772 14 5 14H6C6.55228 14 7 13.5523 7 13V12C7 11.4477 6.55228 11 6 11H5Z"
-                                    fill="#187CEE"/>
-                              <path fill-rule="evenodd" clip-rule="evenodd"
-                                    d="M9 4C8.44772 4 8 4.44772 8 5V6C8 6.55228 8.44772 7 9 7H10C10.5523 7 11 6.55228 11 6V5C11 4.44772 10.5523 4 10 4H9ZM9 11C8.44772 11 8 11.4477 8 12V13C8 13.5523 8.44772 14 9 14H10C10.5523 14 11 13.5523 11 13V12C11 11.4477 10.5523 11 10 11H9Z"
-                                    fill="#187CEE"/>
-                              <path fill-rule="evenodd" clip-rule="evenodd"
-                                    d="M13 4C12.4477 4 12 4.44772 12 5V6C12 6.55228 12.4477 7 13 7H14C14.5523 7 15 6.55228 15 6V5C15 4.44772 14.5523 4 14 4H13ZM13 11C12.4477 11 12 11.4477 12 12V13C12 13.5523 12.4477 14 13 14H14C14.5523 14 15 13.5523 15 13V12C15 11.4477 14.5523 11 14 11H13Z"
-                                    fill="#187CEE"/>
-                              <path fill-rule="evenodd" clip-rule="evenodd"
-                                    d="M17 4C16.4477 4 16 4.44772 16 5V6C16 6.55228 16.4477 7 17 7H18C18.5523 7 19 6.55228 19 6V5C19 4.44772 18.5523 4 18 4H17ZM17 11C16.4477 11 16 11.4477 16 12V13C16 13.5523 16.4477 14 17 14H18C18.5523 14 19 13.5523 19 13V12C19 11.4477 18.5523 11 18 11H17Z"
-                                    fill="#187CEE"/>
-                              <path fill-rule="evenodd" clip-rule="evenodd"
-                                    d="M21 4C20.4477 4 20 4.44772 20 5V6C20 6.55228 20.4477 7 21 7H22C22.5523 7 23 6.55228 23 6V5C23 4.44772 22.5523 4 22 4H21ZM21 11C20.4477 11 20 11.4477 20 12V13C20 13.5523 20.4477 14 21 14H22C22.5523 14 23 13.5523 23 13V12C23 11.4477 22.5523 11 22 11H21Z"
-                                    fill="#187CEE"/>
-                              <path fill-rule="evenodd" clip-rule="evenodd"
-                                    d="M25 4C24.4477 4 24 4.44772 24 5V6C24 6.55228 24.4477 7 25 7H26C26.5523 7 27 6.55228 27 6V5C27 4.44772 26.5523 4 26 4H25ZM25 11C24.4477 11 24 11.4477 24 12V13C24 13.5523 24.4477 14 25 14H26C26.5523 14 27 13.5523 27 13V12C27 11.4477 26.5523 11 26 11H25Z"
-                                    fill="#187CEE"/>
-                              <path fill-rule="evenodd" clip-rule="evenodd"
-                                    d="M29 4C28.4477 4 28 4.44772 28 5V6C28 6.55228 28.4477 7 29 7H30C30.5523 7 31 6.55228 31 6V5C31 4.44772 30.5523 4 30 4H29ZM29 11C28.4477 11 28 11.4477 28 12V13C28 13.5523 28.4477 14 29 14H30C30.5523 14 31 13.5523 31 13V12C31 11.4477 30.5523 11 30 11H29Z"
-                                    fill="#187CEE"/>
-                              <rect x="0.5" y="0.5" width="34" height="17" rx="2.5" stroke="#187CEE"/>
-                           </svg>
-                        </div>
-                     </div>
-                     <div class="car">
-                        <div class="car__item">
-                           <strong class="car__number bold">12</strong>
-                           <span class="car__wagon mini">Вагон</span>
-                           <span class="car__type normal">Плацкартный</span>
-                        </div>
-                        <div class="car__item">
-                           <strong class="car__seats bold">123</strong>
-                        </div>
-                        <div class="car__item">
-                           <strong class="car__from mini">от</strong>
-                           <span class="car__price bold">232 000</span>
-                           <span class="car__sum mini">сум</span>
-                           <svg class="car__scheme" width="35" height="18" viewBox="0 0 35 18" fill="none"
-                                xmlns="http://www.w3.org/2000/svg">
-                              <rect x="0.5" y="0.5" width="34" height="17" rx="2.5" fill="#EEF0F5"/>
-                              <path fill-rule="evenodd" clip-rule="evenodd"
-                                    d="M5 4C4.44772 4 4 4.44772 4 5V6C4 6.55228 4.44772 7 5 7H6C6.55228 7 7 6.55228 7 6V5C7 4.44772 6.55228 4 6 4H5ZM5 11C4.44772 11 4 11.4477 4 12V13C4 13.5523 4.44772 14 5 14H6C6.55228 14 7 13.5523 7 13V12C7 11.4477 6.55228 11 6 11H5Z"
-                                    fill="#187CEE"/>
-                              <path fill-rule="evenodd" clip-rule="evenodd"
-                                    d="M9 4C8.44772 4 8 4.44772 8 5V6C8 6.55228 8.44772 7 9 7H10C10.5523 7 11 6.55228 11 6V5C11 4.44772 10.5523 4 10 4H9ZM9 11C8.44772 11 8 11.4477 8 12V13C8 13.5523 8.44772 14 9 14H10C10.5523 14 11 13.5523 11 13V12C11 11.4477 10.5523 11 10 11H9Z"
-                                    fill="#187CEE"/>
-                              <path fill-rule="evenodd" clip-rule="evenodd"
-                                    d="M13 4C12.4477 4 12 4.44772 12 5V6C12 6.55228 12.4477 7 13 7H14C14.5523 7 15 6.55228 15 6V5C15 4.44772 14.5523 4 14 4H13ZM13 11C12.4477 11 12 11.4477 12 12V13C12 13.5523 12.4477 14 13 14H14C14.5523 14 15 13.5523 15 13V12C15 11.4477 14.5523 11 14 11H13Z"
-                                    fill="#187CEE"/>
-                              <path fill-rule="evenodd" clip-rule="evenodd"
-                                    d="M17 4C16.4477 4 16 4.44772 16 5V6C16 6.55228 16.4477 7 17 7H18C18.5523 7 19 6.55228 19 6V5C19 4.44772 18.5523 4 18 4H17ZM17 11C16.4477 11 16 11.4477 16 12V13C16 13.5523 16.4477 14 17 14H18C18.5523 14 19 13.5523 19 13V12C19 11.4477 18.5523 11 18 11H17Z"
-                                    fill="#187CEE"/>
-                              <path fill-rule="evenodd" clip-rule="evenodd"
-                                    d="M21 4C20.4477 4 20 4.44772 20 5V6C20 6.55228 20.4477 7 21 7H22C22.5523 7 23 6.55228 23 6V5C23 4.44772 22.5523 4 22 4H21ZM21 11C20.4477 11 20 11.4477 20 12V13C20 13.5523 20.4477 14 21 14H22C22.5523 14 23 13.5523 23 13V12C23 11.4477 22.5523 11 22 11H21Z"
-                                    fill="#187CEE"/>
-                              <path fill-rule="evenodd" clip-rule="evenodd"
-                                    d="M25 4C24.4477 4 24 4.44772 24 5V6C24 6.55228 24.4477 7 25 7H26C26.5523 7 27 6.55228 27 6V5C27 4.44772 26.5523 4 26 4H25ZM25 11C24.4477 11 24 11.4477 24 12V13C24 13.5523 24.4477 14 25 14H26C26.5523 14 27 13.5523 27 13V12C27 11.4477 26.5523 11 26 11H25Z"
-                                    fill="#187CEE"/>
-                              <path fill-rule="evenodd" clip-rule="evenodd"
-                                    d="M29 4C28.4477 4 28 4.44772 28 5V6C28 6.55228 28.4477 7 29 7H30C30.5523 7 31 6.55228 31 6V5C31 4.44772 30.5523 4 30 4H29ZM29 11C28.4477 11 28 11.4477 28 12V13C28 13.5523 28.4477 14 29 14H30C30.5523 14 31 13.5523 31 13V12C31 11.4477 30.5523 11 30 11H29Z"
-                                    fill="#187CEE"/>
-                              <rect x="0.5" y="0.5" width="34" height="17" rx="2.5" stroke="#187CEE"/>
-                           </svg>
-                        </div>
-                     </div>
-                     <div class="car">
-                        <div class="car__item">
-                           <strong class="car__number bold">12</strong>
-                           <span class="car__wagon mini">Вагон</span>
-                           <span class="car__type normal">СВ</span>
-                        </div>
-                        <div class="car__item">
-                           <strong class="car__seats bold">23</strong>
-                        </div>
-                        <div class="car__item">
-                           <strong class="car__from mini">от</strong>
-                           <span class="car__price bold">232 000</span>
-                           <span class="car__sum mini">сум</span>
-                           <svg class="car__scheme" width="35" height="18" viewBox="0 0 35 18" fill="none"
-                                xmlns="http://www.w3.org/2000/svg">
-                              <rect x="0.5" y="0.5" width="34" height="17" rx="2.5" fill="#EEF0F5"/>
-                              <path fill-rule="evenodd" clip-rule="evenodd"
-                                    d="M5 4C4.44772 4 4 4.44772 4 5V6C4 6.55228 4.44772 7 5 7H6C6.55228 7 7 6.55228 7 6V5C7 4.44772 6.55228 4 6 4H5ZM5 11C4.44772 11 4 11.4477 4 12V13C4 13.5523 4.44772 14 5 14H6C6.55228 14 7 13.5523 7 13V12C7 11.4477 6.55228 11 6 11H5Z"
-                                    fill="#187CEE"/>
-                              <path fill-rule="evenodd" clip-rule="evenodd"
-                                    d="M9 4C8.44772 4 8 4.44772 8 5V6C8 6.55228 8.44772 7 9 7H10C10.5523 7 11 6.55228 11 6V5C11 4.44772 10.5523 4 10 4H9ZM9 11C8.44772 11 8 11.4477 8 12V13C8 13.5523 8.44772 14 9 14H10C10.5523 14 11 13.5523 11 13V12C11 11.4477 10.5523 11 10 11H9Z"
-                                    fill="#187CEE"/>
-                              <path fill-rule="evenodd" clip-rule="evenodd"
-                                    d="M13 4C12.4477 4 12 4.44772 12 5V6C12 6.55228 12.4477 7 13 7H14C14.5523 7 15 6.55228 15 6V5C15 4.44772 14.5523 4 14 4H13ZM13 11C12.4477 11 12 11.4477 12 12V13C12 13.5523 12.4477 14 13 14H14C14.5523 14 15 13.5523 15 13V12C15 11.4477 14.5523 11 14 11H13Z"
-                                    fill="#187CEE"/>
-                              <path fill-rule="evenodd" clip-rule="evenodd"
-                                    d="M17 4C16.4477 4 16 4.44772 16 5V6C16 6.55228 16.4477 7 17 7H18C18.5523 7 19 6.55228 19 6V5C19 4.44772 18.5523 4 18 4H17ZM17 11C16.4477 11 16 11.4477 16 12V13C16 13.5523 16.4477 14 17 14H18C18.5523 14 19 13.5523 19 13V12C19 11.4477 18.5523 11 18 11H17Z"
-                                    fill="#187CEE"/>
-                              <path fill-rule="evenodd" clip-rule="evenodd"
-                                    d="M21 4C20.4477 4 20 4.44772 20 5V6C20 6.55228 20.4477 7 21 7H22C22.5523 7 23 6.55228 23 6V5C23 4.44772 22.5523 4 22 4H21ZM21 11C20.4477 11 20 11.4477 20 12V13C20 13.5523 20.4477 14 21 14H22C22.5523 14 23 13.5523 23 13V12C23 11.4477 22.5523 11 22 11H21Z"
-                                    fill="#187CEE"/>
-                              <path fill-rule="evenodd" clip-rule="evenodd"
-                                    d="M25 4C24.4477 4 24 4.44772 24 5V6C24 6.55228 24.4477 7 25 7H26C26.5523 7 27 6.55228 27 6V5C27 4.44772 26.5523 4 26 4H25ZM25 11C24.4477 11 24 11.4477 24 12V13C24 13.5523 24.4477 14 25 14H26C26.5523 14 27 13.5523 27 13V12C27 11.4477 26.5523 11 26 11H25Z"
-                                    fill="#187CEE"/>
-                              <path fill-rule="evenodd" clip-rule="evenodd"
-                                    d="M29 4C28.4477 4 28 4.44772 28 5V6C28 6.55228 28.4477 7 29 7H30C30.5523 7 31 6.55228 31 6V5C31 4.44772 30.5523 4 30 4H29ZM29 11C28.4477 11 28 11.4477 28 12V13C28 13.5523 28.4477 14 29 14H30C30.5523 14 31 13.5523 31 13V12C31 11.4477 30.5523 11 30 11H29Z"
-                                    fill="#187CEE"/>
-                              <rect x="0.5" y="0.5" width="34" height="17" rx="2.5" stroke="#187CEE"/>
-                           </svg>
-                        </div>
-                     </div>
+                     </ng-container>
                   </div>
                </li>
             </ul>
@@ -278,19 +219,19 @@
             <h2 class="list__heading">Найдено {{ backwardTrains.length }} вариантов для обратно</h2>
 
             <ul class="list__ul">
-               <li class="list__item train" *ngFor="let train of backwardTrains">
+               <li class="list__item train" *ngFor="let train of backwardTrains; let i = index">
                   <div class="train__header">
                      <div class="train__info">
                         <strong>{{ train.number }} ({{ train.type }}) {{ train.brand ? '(' + train.brand + ')' : null }}</strong>
-                        <span>{{ passRouteBackward.from }} → {{ passRouteBackward.to }}</span>
+                        <span>{{ train.route.station[0] }} → {{ train.route.station[1] }}</span>
                      </div>
 
                      <div class="train__stations">
                         <div class="station">
-                           <div class="station__date">вт 25 май</div>
+                           <div class="station__date">{{ train.departure.localDate }}</div>
                            <div>
-                              <strong class="station__time">22:15</strong>
-                              <span class="station__name">ТАШКЕНТ</span>
+                              <strong class="station__time">{{ train.departure.localTime }}</strong>
+                              <span class="station__name">{{ passRouteForward.to }}</span>
                            </div>
                         </div>
                         <svg class="station__arrow" width="12" height="6" viewBox="0 0 12 6" fill="none"
@@ -300,154 +241,87 @@
                               fill="#354356"/>
                         </svg>
                         <div class="station">
-                           <div class="station__date">вт 25 май</div>
+                           <div class="station__date">{{ train.arrival.localDate }}</div>
                            <div>
-                              <strong class="station__time">22:15</strong>
-                              <span class="station__name">ТАШКЕНТ</span>
+                              <strong class="station__time">{{ train.arrival.localTime }}</strong>
+                              <span class="station__name">{{ passRouteForward.from }}</span>
                            </div>
                         </div>
+                     </div>
+
+                     <div class="train__time-in-way">
+                        <span>В пути</span>
+                        <strong>{{ train.timeInWay }}</strong>
                      </div>
                   </div>
 
                   <div class="train__car-types">
-                     <div class="car-type">
-                        Люкс <strong>123</strong> от <strong>1 234 567</strong> сум
-                     </div>
-                     <div class="car-type">
-                        Купе <strong>123</strong> от <strong>1 234 567</strong> сум
-                     </div>
-                     <div class="car-type">
-                        СВ <strong>123</strong> от <strong>1 234 567</strong> сум
-                     </div>
-                     <div class="car-type">
-                        Сидячий <strong>123</strong> от <strong>1 234 567</strong> сум
+                     <div
+                        class="car-type car-type--backward"
+                        *ngFor="let carType of calculateCarTypesAndPrices(train.places.cars)"
+                        (click)="getAvailablePlaces(train.number, 'Backward', carType.type, i)"
+                     >
+                        {{ carType.type }} <strong>{{ carType.freeSeats }}</strong> от
+                        <strong>{{ carType.prices.join(', ') }} </strong> сум
                      </div>
                   </div>
 
-                  <div class="train__cars cars">
-                     <div class="car">
-                        <div class="car__item">
-                           <strong class="car__number bold">12</strong>
-                           <span class="car__wagon mini">Вагон</span>
-                           <span class="car__type normal">Купе</span>
+                  <div class="train__cars cars" *ngIf="backwardAvailableCarTypes.length && train.showCars">
+                     <ng-container *ngFor="let carType of backwardAvailableCarTypes">
+                        <div class="car" *ngFor="let car of carType.car">
+                           <div class="car__item">
+                              <strong class="car__number bold">{{ car.number }}</strong>
+                              <span class="car__wagon mini">Вагон</span>
+                              <span class="car__type normal">{{ carType.type }}</span>
+                           </div>
+                           <div class="car__item">
+                              <strong class="car__seats bold">{{ getFreeSeatsCount(car.places) }}</strong>
+                           </div>
+                           <div class="car__item">
+                              <strong class="car__from mini">от</strong>
+                              <span class="car__price bold">{{ carType.tariff }}</span>
+                              <span class="car__sum mini">сум</span>
+                              <span class="car__conditioner car__conditioner--with" title="с кондиционером" *ngIf="carType.classService.service.conditioner">
+                                 <svg width="16" height="18" viewBox="0 0 16 18" fill="#187CEE" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M7.25117 17.5078V15.1312L5.99258 15.8766L5.37734 15.4898V14.6531L7.25117 13.5316V11.9672L5.75 12.8883V11.2324L4.24883 12.0164V14.2629L3.63008 14.7234L3.12383 14.3086V12.8039L1.03203 13.9746L0.125 13.602V12.6527L2.25547 11.4645L0.873828 10.7824V9.91406L1.66836 9.49219L3.62305 10.6418L4.97656 9.86133L4.94492 9.83672L3.57031 9.04219L4.90977 8.20547L3.5668 7.425L1.61211 8.57109L0.870313 8.20898V7.34414L2.19922 6.60234L0.125 5.44922V4.5L0.996875 4.08164L3.12734 5.28047V3.75117L3.68281 3.3293L4.41055 3.77227L4.38945 6.06094L5.76758 6.85547L5.78164 5.23828L7.25117 6.02578V4.46484L5.37734 3.34336V2.51719L5.99258 2.12344L7.25117 2.86875V0.495703L7.99648 0L8.74883 0.495703V2.86875L10.2148 2.10938L10.9988 2.56641V3.31523L8.74883 4.47187V6.03281L10.25 5.18203V6.88359L11.7512 6.10313V3.65625L12.2961 3.33281L12.8762 3.65625V5.21719L15.0664 4.06406L15.875 4.52109V5.40703L13.8148 6.59531L15.1262 7.32656V8.17031L14.4406 8.54297L12.4437 7.3582L11.0656 8.23711L12.398 9.07383L11.027 9.86836L12.4402 10.6172L14.4617 9.4957L15.1297 9.95273V10.7578L13.8852 11.4645L15.8785 12.6527V13.5879L14.9328 13.9781L12.8797 12.8566V14.3402L12.3066 14.7305L11.7512 14.3367V12.0867L10.25 11.257V12.8215L8.74883 11.9707V13.5352L10.6227 14.6566V15.5391L10.0039 15.8766L8.74531 15.1312V17.5078L7.99297 18L7.25117 17.5078ZM6.69922 9.03516L7.40586 10.125H8.72422L9.32891 9.03516L8.68906 7.875H7.3707L6.69922 9.03516Z"
+                                          fill="'#187CEE"/>
+                                 </svg>
+                              </span>
+                              <span class="car__conditioner car__conditioner--without" title="без кондиционера" *ngIf="!carType.classService.service.conditioner">
+                                 <svg width="16" height="18" viewBox="0 0 16 18" fill="#DDE0ED" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M7.25117 17.5078V15.1312L5.99258 15.8766L5.37734 15.4898V14.6531L7.25117 13.5316V11.9672L5.75 12.8883V11.2324L4.24883 12.0164V14.2629L3.63008 14.7234L3.12383 14.3086V12.8039L1.03203 13.9746L0.125 13.602V12.6527L2.25547 11.4645L0.873828 10.7824V9.91406L1.66836 9.49219L3.62305 10.6418L4.97656 9.86133L4.94492 9.83672L3.57031 9.04219L4.90977 8.20547L3.5668 7.425L1.61211 8.57109L0.870313 8.20898V7.34414L2.19922 6.60234L0.125 5.44922V4.5L0.996875 4.08164L3.12734 5.28047V3.75117L3.68281 3.3293L4.41055 3.77227L4.38945 6.06094L5.76758 6.85547L5.78164 5.23828L7.25117 6.02578V4.46484L5.37734 3.34336V2.51719L5.99258 2.12344L7.25117 2.86875V0.495703L7.99648 0L8.74883 0.495703V2.86875L10.2148 2.10938L10.9988 2.56641V3.31523L8.74883 4.47187V6.03281L10.25 5.18203V6.88359L11.7512 6.10313V3.65625L12.2961 3.33281L12.8762 3.65625V5.21719L15.0664 4.06406L15.875 4.52109V5.40703L13.8148 6.59531L15.1262 7.32656V8.17031L14.4406 8.54297L12.4437 7.3582L11.0656 8.23711L12.398 9.07383L11.027 9.86836L12.4402 10.6172L14.4617 9.4957L15.1297 9.95273V10.7578L13.8852 11.4645L15.8785 12.6527V13.5879L14.9328 13.9781L12.8797 12.8566V14.3402L12.3066 14.7305L11.7512 14.3367V12.0867L10.25 11.257V12.8215L8.74883 11.9707V13.5352L10.6227 14.6566V15.5391L10.0039 15.8766L8.74531 15.1312V17.5078L7.99297 18L7.25117 17.5078ZM6.69922 9.03516L7.40586 10.125H8.72422L9.32891 9.03516L8.68906 7.875H7.3707L6.69922 9.03516Z"
+                                          fill="'#DDE0ED"/>
+                                 </svg>
+                              </span>
+                              <svg class="car__scheme" width="35" height="18" viewBox="0 0 35 18" fill="none"
+                                   xmlns="http://www.w3.org/2000/svg">
+                                 <rect x="0.5" y="0.5" width="34" height="17" rx="2.5" fill="#EEF0F5"/>
+                                 <path fill-rule="evenodd" clip-rule="evenodd"
+                                       d="M5 4C4.44772 4 4 4.44772 4 5V6C4 6.55228 4.44772 7 5 7H6C6.55228 7 7 6.55228 7 6V5C7 4.44772 6.55228 4 6 4H5ZM5 11C4.44772 11 4 11.4477 4 12V13C4 13.5523 4.44772 14 5 14H6C6.55228 14 7 13.5523 7 13V12C7 11.4477 6.55228 11 6 11H5Z"
+                                       fill="#187CEE"/>
+                                 <path fill-rule="evenodd" clip-rule="evenodd"
+                                       d="M9 4C8.44772 4 8 4.44772 8 5V6C8 6.55228 8.44772 7 9 7H10C10.5523 7 11 6.55228 11 6V5C11 4.44772 10.5523 4 10 4H9ZM9 11C8.44772 11 8 11.4477 8 12V13C8 13.5523 8.44772 14 9 14H10C10.5523 14 11 13.5523 11 13V12C11 11.4477 10.5523 11 10 11H9Z"
+                                       fill="#187CEE"/>
+                                 <path fill-rule="evenodd" clip-rule="evenodd"
+                                       d="M13 4C12.4477 4 12 4.44772 12 5V6C12 6.55228 12.4477 7 13 7H14C14.5523 7 15 6.55228 15 6V5C15 4.44772 14.5523 4 14 4H13ZM13 11C12.4477 11 12 11.4477 12 12V13C12 13.5523 12.4477 14 13 14H14C14.5523 14 15 13.5523 15 13V12C15 11.4477 14.5523 11 14 11H13Z"
+                                       fill="#187CEE"/>
+                                 <path fill-rule="evenodd" clip-rule="evenodd"
+                                       d="M17 4C16.4477 4 16 4.44772 16 5V6C16 6.55228 16.4477 7 17 7H18C18.5523 7 19 6.55228 19 6V5C19 4.44772 18.5523 4 18 4H17ZM17 11C16.4477 11 16 11.4477 16 12V13C16 13.5523 16.4477 14 17 14H18C18.5523 14 19 13.5523 19 13V12C19 11.4477 18.5523 11 18 11H17Z"
+                                       fill="#187CEE"/>
+                                 <path fill-rule="evenodd" clip-rule="evenodd"
+                                       d="M21 4C20.4477 4 20 4.44772 20 5V6C20 6.55228 20.4477 7 21 7H22C22.5523 7 23 6.55228 23 6V5C23 4.44772 22.5523 4 22 4H21ZM21 11C20.4477 11 20 11.4477 20 12V13C20 13.5523 20.4477 14 21 14H22C22.5523 14 23 13.5523 23 13V12C23 11.4477 22.5523 11 22 11H21Z"
+                                       fill="#187CEE"/>
+                                 <path fill-rule="evenodd" clip-rule="evenodd"
+                                       d="M25 4C24.4477 4 24 4.44772 24 5V6C24 6.55228 24.4477 7 25 7H26C26.5523 7 27 6.55228 27 6V5C27 4.44772 26.5523 4 26 4H25ZM25 11C24.4477 11 24 11.4477 24 12V13C24 13.5523 24.4477 14 25 14H26C26.5523 14 27 13.5523 27 13V12C27 11.4477 26.5523 11 26 11H25Z"
+                                       fill="#187CEE"/>
+                                 <path fill-rule="evenodd" clip-rule="evenodd"
+                                       d="M29 4C28.4477 4 28 4.44772 28 5V6C28 6.55228 28.4477 7 29 7H30C30.5523 7 31 6.55228 31 6V5C31 4.44772 30.5523 4 30 4H29ZM29 11C28.4477 11 28 11.4477 28 12V13C28 13.5523 28.4477 14 29 14H30C30.5523 14 31 13.5523 31 13V12C31 11.4477 30.5523 11 30 11H29Z"
+                                       fill="#187CEE"/>
+                                 <rect x="0.5" y="0.5" width="34" height="17" rx="2.5" stroke="#187CEE"/>
+                              </svg>
+                           </div>
                         </div>
-                        <div class="car__item">
-                           <strong class="car__seats bold">3</strong>
-                        </div>
-                        <div class="car__item">
-                           <strong class="car__from mini">от</strong>
-                           <span class="car__price bold">1 232 000</span>
-                           <span class="car__sum mini">сум</span>
-                           <svg class="car__scheme" width="35" height="18" viewBox="0 0 35 18" fill="none"
-                                xmlns="http://www.w3.org/2000/svg">
-                              <rect x="0.5" y="0.5" width="34" height="17" rx="2.5" fill="#EEF0F5"/>
-                              <path fill-rule="evenodd" clip-rule="evenodd"
-                                    d="M5 4C4.44772 4 4 4.44772 4 5V6C4 6.55228 4.44772 7 5 7H6C6.55228 7 7 6.55228 7 6V5C7 4.44772 6.55228 4 6 4H5ZM5 11C4.44772 11 4 11.4477 4 12V13C4 13.5523 4.44772 14 5 14H6C6.55228 14 7 13.5523 7 13V12C7 11.4477 6.55228 11 6 11H5Z"
-                                    fill="#187CEE"/>
-                              <path fill-rule="evenodd" clip-rule="evenodd"
-                                    d="M9 4C8.44772 4 8 4.44772 8 5V6C8 6.55228 8.44772 7 9 7H10C10.5523 7 11 6.55228 11 6V5C11 4.44772 10.5523 4 10 4H9ZM9 11C8.44772 11 8 11.4477 8 12V13C8 13.5523 8.44772 14 9 14H10C10.5523 14 11 13.5523 11 13V12C11 11.4477 10.5523 11 10 11H9Z"
-                                    fill="#187CEE"/>
-                              <path fill-rule="evenodd" clip-rule="evenodd"
-                                    d="M13 4C12.4477 4 12 4.44772 12 5V6C12 6.55228 12.4477 7 13 7H14C14.5523 7 15 6.55228 15 6V5C15 4.44772 14.5523 4 14 4H13ZM13 11C12.4477 11 12 11.4477 12 12V13C12 13.5523 12.4477 14 13 14H14C14.5523 14 15 13.5523 15 13V12C15 11.4477 14.5523 11 14 11H13Z"
-                                    fill="#187CEE"/>
-                              <path fill-rule="evenodd" clip-rule="evenodd"
-                                    d="M17 4C16.4477 4 16 4.44772 16 5V6C16 6.55228 16.4477 7 17 7H18C18.5523 7 19 6.55228 19 6V5C19 4.44772 18.5523 4 18 4H17ZM17 11C16.4477 11 16 11.4477 16 12V13C16 13.5523 16.4477 14 17 14H18C18.5523 14 19 13.5523 19 13V12C19 11.4477 18.5523 11 18 11H17Z"
-                                    fill="#187CEE"/>
-                              <path fill-rule="evenodd" clip-rule="evenodd"
-                                    d="M21 4C20.4477 4 20 4.44772 20 5V6C20 6.55228 20.4477 7 21 7H22C22.5523 7 23 6.55228 23 6V5C23 4.44772 22.5523 4 22 4H21ZM21 11C20.4477 11 20 11.4477 20 12V13C20 13.5523 20.4477 14 21 14H22C22.5523 14 23 13.5523 23 13V12C23 11.4477 22.5523 11 22 11H21Z"
-                                    fill="#187CEE"/>
-                              <path fill-rule="evenodd" clip-rule="evenodd"
-                                    d="M25 4C24.4477 4 24 4.44772 24 5V6C24 6.55228 24.4477 7 25 7H26C26.5523 7 27 6.55228 27 6V5C27 4.44772 26.5523 4 26 4H25ZM25 11C24.4477 11 24 11.4477 24 12V13C24 13.5523 24.4477 14 25 14H26C26.5523 14 27 13.5523 27 13V12C27 11.4477 26.5523 11 26 11H25Z"
-                                    fill="#187CEE"/>
-                              <path fill-rule="evenodd" clip-rule="evenodd"
-                                    d="M29 4C28.4477 4 28 4.44772 28 5V6C28 6.55228 28.4477 7 29 7H30C30.5523 7 31 6.55228 31 6V5C31 4.44772 30.5523 4 30 4H29ZM29 11C28.4477 11 28 11.4477 28 12V13C28 13.5523 28.4477 14 29 14H30C30.5523 14 31 13.5523 31 13V12C31 11.4477 30.5523 11 30 11H29Z"
-                                    fill="#187CEE"/>
-                              <rect x="0.5" y="0.5" width="34" height="17" rx="2.5" stroke="#187CEE"/>
-                           </svg>
-                        </div>
-                     </div>
-                     <div class="car">
-                        <div class="car__item">
-                           <strong class="car__number bold">12</strong>
-                           <span class="car__wagon mini">Вагон</span>
-                           <span class="car__type normal">Плацкартный</span>
-                        </div>
-                        <div class="car__item">
-                           <strong class="car__seats bold">123</strong>
-                        </div>
-                        <div class="car__item">
-                           <strong class="car__from mini">от</strong>
-                           <span class="car__price bold">232 000</span>
-                           <span class="car__sum mini">сум</span>
-                           <svg class="car__scheme" width="35" height="18" viewBox="0 0 35 18" fill="none"
-                                xmlns="http://www.w3.org/2000/svg">
-                              <rect x="0.5" y="0.5" width="34" height="17" rx="2.5" fill="#EEF0F5"/>
-                              <path fill-rule="evenodd" clip-rule="evenodd"
-                                    d="M5 4C4.44772 4 4 4.44772 4 5V6C4 6.55228 4.44772 7 5 7H6C6.55228 7 7 6.55228 7 6V5C7 4.44772 6.55228 4 6 4H5ZM5 11C4.44772 11 4 11.4477 4 12V13C4 13.5523 4.44772 14 5 14H6C6.55228 14 7 13.5523 7 13V12C7 11.4477 6.55228 11 6 11H5Z"
-                                    fill="#187CEE"/>
-                              <path fill-rule="evenodd" clip-rule="evenodd"
-                                    d="M9 4C8.44772 4 8 4.44772 8 5V6C8 6.55228 8.44772 7 9 7H10C10.5523 7 11 6.55228 11 6V5C11 4.44772 10.5523 4 10 4H9ZM9 11C8.44772 11 8 11.4477 8 12V13C8 13.5523 8.44772 14 9 14H10C10.5523 14 11 13.5523 11 13V12C11 11.4477 10.5523 11 10 11H9Z"
-                                    fill="#187CEE"/>
-                              <path fill-rule="evenodd" clip-rule="evenodd"
-                                    d="M13 4C12.4477 4 12 4.44772 12 5V6C12 6.55228 12.4477 7 13 7H14C14.5523 7 15 6.55228 15 6V5C15 4.44772 14.5523 4 14 4H13ZM13 11C12.4477 11 12 11.4477 12 12V13C12 13.5523 12.4477 14 13 14H14C14.5523 14 15 13.5523 15 13V12C15 11.4477 14.5523 11 14 11H13Z"
-                                    fill="#187CEE"/>
-                              <path fill-rule="evenodd" clip-rule="evenodd"
-                                    d="M17 4C16.4477 4 16 4.44772 16 5V6C16 6.55228 16.4477 7 17 7H18C18.5523 7 19 6.55228 19 6V5C19 4.44772 18.5523 4 18 4H17ZM17 11C16.4477 11 16 11.4477 16 12V13C16 13.5523 16.4477 14 17 14H18C18.5523 14 19 13.5523 19 13V12C19 11.4477 18.5523 11 18 11H17Z"
-                                    fill="#187CEE"/>
-                              <path fill-rule="evenodd" clip-rule="evenodd"
-                                    d="M21 4C20.4477 4 20 4.44772 20 5V6C20 6.55228 20.4477 7 21 7H22C22.5523 7 23 6.55228 23 6V5C23 4.44772 22.5523 4 22 4H21ZM21 11C20.4477 11 20 11.4477 20 12V13C20 13.5523 20.4477 14 21 14H22C22.5523 14 23 13.5523 23 13V12C23 11.4477 22.5523 11 22 11H21Z"
-                                    fill="#187CEE"/>
-                              <path fill-rule="evenodd" clip-rule="evenodd"
-                                    d="M25 4C24.4477 4 24 4.44772 24 5V6C24 6.55228 24.4477 7 25 7H26C26.5523 7 27 6.55228 27 6V5C27 4.44772 26.5523 4 26 4H25ZM25 11C24.4477 11 24 11.4477 24 12V13C24 13.5523 24.4477 14 25 14H26C26.5523 14 27 13.5523 27 13V12C27 11.4477 26.5523 11 26 11H25Z"
-                                    fill="#187CEE"/>
-                              <path fill-rule="evenodd" clip-rule="evenodd"
-                                    d="M29 4C28.4477 4 28 4.44772 28 5V6C28 6.55228 28.4477 7 29 7H30C30.5523 7 31 6.55228 31 6V5C31 4.44772 30.5523 4 30 4H29ZM29 11C28.4477 11 28 11.4477 28 12V13C28 13.5523 28.4477 14 29 14H30C30.5523 14 31 13.5523 31 13V12C31 11.4477 30.5523 11 30 11H29Z"
-                                    fill="#187CEE"/>
-                              <rect x="0.5" y="0.5" width="34" height="17" rx="2.5" stroke="#187CEE"/>
-                           </svg>
-                        </div>
-                     </div>
-                     <div class="car">
-                        <div class="car__item">
-                           <strong class="car__number bold">12</strong>
-                           <span class="car__wagon mini">Вагон</span>
-                           <span class="car__type normal">СВ</span>
-                        </div>
-                        <div class="car__item">
-                           <strong class="car__seats bold">23</strong>
-                        </div>
-                        <div class="car__item">
-                           <strong class="car__from mini">от</strong>
-                           <span class="car__price bold">232 000</span>
-                           <span class="car__sum mini">сум</span>
-                           <svg class="car__scheme" width="35" height="18" viewBox="0 0 35 18" fill="none"
-                                xmlns="http://www.w3.org/2000/svg">
-                              <rect x="0.5" y="0.5" width="34" height="17" rx="2.5" fill="#EEF0F5"/>
-                              <path fill-rule="evenodd" clip-rule="evenodd"
-                                    d="M5 4C4.44772 4 4 4.44772 4 5V6C4 6.55228 4.44772 7 5 7H6C6.55228 7 7 6.55228 7 6V5C7 4.44772 6.55228 4 6 4H5ZM5 11C4.44772 11 4 11.4477 4 12V13C4 13.5523 4.44772 14 5 14H6C6.55228 14 7 13.5523 7 13V12C7 11.4477 6.55228 11 6 11H5Z"
-                                    fill="#187CEE"/>
-                              <path fill-rule="evenodd" clip-rule="evenodd"
-                                    d="M9 4C8.44772 4 8 4.44772 8 5V6C8 6.55228 8.44772 7 9 7H10C10.5523 7 11 6.55228 11 6V5C11 4.44772 10.5523 4 10 4H9ZM9 11C8.44772 11 8 11.4477 8 12V13C8 13.5523 8.44772 14 9 14H10C10.5523 14 11 13.5523 11 13V12C11 11.4477 10.5523 11 10 11H9Z"
-                                    fill="#187CEE"/>
-                              <path fill-rule="evenodd" clip-rule="evenodd"
-                                    d="M13 4C12.4477 4 12 4.44772 12 5V6C12 6.55228 12.4477 7 13 7H14C14.5523 7 15 6.55228 15 6V5C15 4.44772 14.5523 4 14 4H13ZM13 11C12.4477 11 12 11.4477 12 12V13C12 13.5523 12.4477 14 13 14H14C14.5523 14 15 13.5523 15 13V12C15 11.4477 14.5523 11 14 11H13Z"
-                                    fill="#187CEE"/>
-                              <path fill-rule="evenodd" clip-rule="evenodd"
-                                    d="M17 4C16.4477 4 16 4.44772 16 5V6C16 6.55228 16.4477 7 17 7H18C18.5523 7 19 6.55228 19 6V5C19 4.44772 18.5523 4 18 4H17ZM17 11C16.4477 11 16 11.4477 16 12V13C16 13.5523 16.4477 14 17 14H18C18.5523 14 19 13.5523 19 13V12C19 11.4477 18.5523 11 18 11H17Z"
-                                    fill="#187CEE"/>
-                              <path fill-rule="evenodd" clip-rule="evenodd"
-                                    d="M21 4C20.4477 4 20 4.44772 20 5V6C20 6.55228 20.4477 7 21 7H22C22.5523 7 23 6.55228 23 6V5C23 4.44772 22.5523 4 22 4H21ZM21 11C20.4477 11 20 11.4477 20 12V13C20 13.5523 20.4477 14 21 14H22C22.5523 14 23 13.5523 23 13V12C23 11.4477 22.5523 11 22 11H21Z"
-                                    fill="#187CEE"/>
-                              <path fill-rule="evenodd" clip-rule="evenodd"
-                                    d="M25 4C24.4477 4 24 4.44772 24 5V6C24 6.55228 24.4477 7 25 7H26C26.5523 7 27 6.55228 27 6V5C27 4.44772 26.5523 4 26 4H25ZM25 11C24.4477 11 24 11.4477 24 12V13C24 13.5523 24.4477 14 25 14H26C26.5523 14 27 13.5523 27 13V12C27 11.4477 26.5523 11 26 11H25Z"
-                                    fill="#187CEE"/>
-                              <path fill-rule="evenodd" clip-rule="evenodd"
-                                    d="M29 4C28.4477 4 28 4.44772 28 5V6C28 6.55228 28.4477 7 29 7H30C30.5523 7 31 6.55228 31 6V5C31 4.44772 30.5523 4 30 4H29ZM29 11C28.4477 11 28 11.4477 28 12V13C28 13.5523 28.4477 14 29 14H30C30.5523 14 31 13.5523 31 13V12C31 11.4477 30.5523 11 30 11H29Z"
-                                    fill="#187CEE"/>
-                              <rect x="0.5" y="0.5" width="34" height="17" rx="2.5" stroke="#187CEE"/>
-                           </svg>
-                        </div>
-                     </div>
+                     </ng-container>
                   </div>
                </li>
             </ul>

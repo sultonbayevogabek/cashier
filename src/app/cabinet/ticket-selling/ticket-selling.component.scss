@@ -137,7 +137,7 @@
 
 .trains {
    display: grid;
-   grid-template-columns: calc(76% - 20px) 24%;
+   grid-template-columns: 1fr 300px;
    grid-gap: 20px;
 }
 
@@ -207,6 +207,7 @@
 }
 
 .train__info {
+   width: 25%;
    margin-right: 30px;
    flex-shrink: 0;
 
@@ -230,6 +231,28 @@
 .train__stations {
    display: flex;
    align-items: center;
+   width: 50%;
+   margin-right: 30px;
+}
+
+.train__time-in-way {
+   flex-shrink: 0;
+
+   strong {
+      display: block;
+      font-weight: 700;
+      font-size: 16px;
+      line-height: 24px;
+   }
+
+   span {
+      display: block;
+      white-space: nowrap;
+      font-weight: 400;
+      font-size: 12px;
+      line-height: 14px;
+      color: #9EA7B8;
+   }
 }
 
 .station__date {
@@ -304,6 +327,10 @@
       .mini {
          color: #FFFFFF;
       }
+
+      .car__conditioner--with svg {
+         fill: #fff;
+      }
    }
 
    &:not(:last-child) {
@@ -360,11 +387,16 @@
 }
 
 .car__price {
-   width: 75px;
+   width: 60px;
    margin-right: 7px;
    text-align: right;
 }
 
 .car__sum {
+   margin-right: 15px;
+}
+
+.car__conditioner {
+   width: 16px;
    margin-right: 15px;
 }

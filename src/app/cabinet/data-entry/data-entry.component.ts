@@ -972,7 +972,6 @@ export class DataEntryComponent implements OnInit {
             country: res.citizenship
          })
       }, err => {
-         console.log(err)
          if (err.error.message === 'camera not found') {
             this.toaster.warning('Камера не найдена')
             return

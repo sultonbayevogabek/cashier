@@ -50,7 +50,9 @@ export class TicketSellingComponent implements OnInit {
 
    /* TRAINS LIST */
    public forwardTrains: Array<any> = []
+   public forwardAvailableCarTypes: Array<any> = []
    public backwardTrains: Array<any> = []
+   public backwardAvailableCarTypes: Array<any> = []
    public passRouteForward: any
    public passRouteBackward: any
 
@@ -187,28 +189,29 @@ export class TicketSellingComponent implements OnInit {
             {
                depDate: this.dateService.formatDateWithDot(this.forwardDate),
                fullday: true,
-               type: "Forward"
+               type: 'Forward'
             }
          ],
          stationFrom: this.departureStationCode,
-         stationTo: this.arrivalStationCode
+         stationTo: this.arrivalStationCode,
+         showWithoutPlaces: 0
       }
 
       if (this.backwardDate) {
          searchingData.direction.push({
             depDate: this.dateService.formatDateWithDot(this.backwardDate),
             fullday: true,
-            type: "Backward"
+            type: 'Backward'
          })
       }
 
       this.apiService.getTrainsListApi(searchingData).subscribe(res => {
-         if (res.express.direction[0].trains[0].train.length) {
+         if (res.express.direction[0].trains && res.express.direction[0].trains[0].train.length) {
             this.forwardTrains = res.express.direction[0].trains[0].train
             this.passRouteForward = res.express.direction[0].passRoute
          }
 
-         if (res.express.direction[1]?.trains[0].train.length) {
+         if (res.express.direction[1]?.trains && res.express.direction[1]?.trains[0].train.length) {
             this.backwardTrains = res.express.direction[1].trains[0].train
             this.passRouteBackward = res.express.direction[1].passRoute
          }
@@ -229,5 +232,64 @@ export class TicketSellingComponent implements OnInit {
          })
       })
       return carTypes
+   }
+
+   getAvailablePlaces(trainNumber: string, direction: string, carType: string, i: number) {
+      if (direction === 'Forward') {
+         this.forwardTrains.forEach((item: any, index) => {
+            if (index === i) {
+               item.showCars = true
+               return
+            }
+            item.showCars = false
+         })
+      } else {
+         this.backwardTrains.forEach((item: any, index) => {
+            if (index === i) {
+               item.showCars = true
+               return
+            }
+            item.showCars = false
+         })
+      }
+      const searchingData = {
+         direction: [
+            {
+               depDate: this.dateService.formatDateWithDot(this.forwardDate),
+               fullday: true,
+               type: 'Forward',
+               train: { number: trainNumber }
+            }
+         ],
+         stationFrom: direction === 'Forward' ? this.departureStationCode : this.arrivalStationCode,
+         stationTo: direction !== 'Backward' ? this.arrivalStationCode : this.departureStationCode,
+         detailNumPlaces: 1
+      }
+      this.apiService.getAvailablePlacesApi(searchingData).subscribe(res => {
+         if (direction === 'Forward') {
+            this.forwardAvailableCarTypes = res.direction[0].trains[0].train.cars.filter((i: any) => i.type === carType)
+            console.log(this.forwardAvailableCarTypes)
+         }
+         if (direction === 'Backward') {
+            this.backwardAvailableCarTypes = res.direction[0].trains[0].train.cars.filter((i: any) => i.type === carType)
+            console.log(this.backwardAvailableCarTypes)
+         }
+         this.setActiveCarType()
+      }, _ => {})
+   }
+
+   setActiveCarType(): void {
+      ['.car-type--forward', '.car-type--backward'].forEach(className => {
+         document.querySelectorAll(className).forEach(item => {
+            item.addEventListener('click', e => {
+               document.querySelectorAll(className).forEach(el => el.classList.remove('active'))
+               item.classList.add('active')
+            })
+         })
+      })
+   }
+
+   getFreeSeatsCount(placesList: string): number {
+      return placesList.split(',').length
    }
 }

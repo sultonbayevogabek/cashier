@@ -20,9 +20,11 @@ export class ApiService {
    }
 
    getTrainsListApi(searchingData: any): Observable<any> {
-      return this.http.post<any>(environment.host + '/api/v1/trains/availability/space/between/stations', {
-         ...searchingData, showWithoutPlaces: 0
-      })
+      return this.http.post<any>(environment.host + '/api/v1/trains/availability/space/between/stations', searchingData)
+   }
+
+   getAvailablePlacesApi(trainInfo: any): Observable<any> {
+      return this.http.post<any>(environment.host + '/api/v1/trains/given/availability/place', trainInfo)
    }
 
    getPassportDataApi(): Observable<any> {
