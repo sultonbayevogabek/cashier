@@ -26,7 +26,6 @@ export class TicketSellingComponent implements OnInit {
    public searchingStationList: Array<any> = []
    public forwardDate = this.dateService.getCurrentDate()
    public backwardDate = ''
-   public passengersCount = 1
    public popularStations = [
       { name: 'ТАШКЕНТ', code: '2900000' },
       { name: 'САМАРКАНД', code: '2900700' },
@@ -46,7 +45,6 @@ export class TicketSellingComponent implements OnInit {
    @ViewChild('arrivalStationInput', { static: true }) arrivalStationInput: any
    @ViewChild('forwardDateInput', { static: true }) forwardDateInput: any
    @ViewChild('backwardDateInput', { static: true }) backwardDateInput: any
-   @ViewChild('passengersCountInput', { static: true }) passengersCountInput: any
 
    /* TRAINS LIST */
    public forwardTrains: Array<any> = []
@@ -55,6 +53,9 @@ export class TicketSellingComponent implements OnInit {
    public backwardAvailableCarTypes: Array<any> = []
    public passRouteForward: any
    public passRouteBackward: any
+
+   /* CAR SCHEME */
+   public carSchemeModalOpen = false
 
    constructor(
       public dateService: DatesService,
@@ -178,12 +179,6 @@ export class TicketSellingComponent implements OnInit {
          return
       }
 
-      if (this.passengersCount < 1 || this.passengersCount > 4) {
-         this.toasterService.warning('Введите количество пассажиров от 1 до 4')
-         this.passengersCountInput.nativeElement.focus()
-         return
-      }
-
       const searchingData = {
          direction: [
             {
@@ -215,8 +210,6 @@ export class TicketSellingComponent implements OnInit {
             this.backwardTrains = res.express.direction[1].trains[0].train
             this.passRouteBackward = res.express.direction[1].passRoute
          }
-
-         console.log(this.forwardTrains)
       })
    }
 
@@ -236,7 +229,11 @@ export class TicketSellingComponent implements OnInit {
 
    getAvailablePlaces(trainNumber: string, direction: string, carType: string, i: number) {
       if (direction === 'Forward') {
+         this.forwardAvailableCarTypes = []
          this.forwardTrains.forEach((item: any, index) => {
+            item.places.cars.forEach((carType: any) => {
+               carType.active = false
+            })
             if (index === i) {
                item.showCars = true
                return
@@ -244,7 +241,11 @@ export class TicketSellingComponent implements OnInit {
             item.showCars = false
          })
       } else {
+         this.backwardAvailableCarTypes = []
          this.backwardTrains.forEach((item: any, index) => {
+            item.places.cars.forEach((carType: any) => {
+               carType.active = false
+            })
             if (index === i) {
                item.showCars = true
                return
@@ -255,7 +256,7 @@ export class TicketSellingComponent implements OnInit {
       const searchingData = {
          direction: [
             {
-               depDate: this.dateService.formatDateWithDot(this.forwardDate),
+               depDate: direction === 'Forward' ? this.dateService.formatDateWithDot(this.forwardDate) : this.dateService.formatDateWithDot(this.backwardDate),
                fullday: true,
                type: 'Forward',
                train: { number: trainNumber }
@@ -268,17 +269,14 @@ export class TicketSellingComponent implements OnInit {
       this.apiService.getAvailablePlacesApi(searchingData).subscribe(res => {
          if (direction === 'Forward') {
             this.forwardAvailableCarTypes = res.direction[0].trains[0].train.cars.filter((i: any) => i.type === carType)
-            console.log(this.forwardAvailableCarTypes)
          }
          if (direction === 'Backward') {
             this.backwardAvailableCarTypes = res.direction[0].trains[0].train.cars.filter((i: any) => i.type === carType)
-            console.log(this.backwardAvailableCarTypes)
          }
-         this.setActiveCarType()
       }, _ => {})
    }
 
-   setActiveCarType(): void {
+   /*setActiveCarType(): void {
       ['.car-type--forward', '.car-type--backward'].forEach(className => {
          document.querySelectorAll(className).forEach(item => {
             item.addEventListener('click', e => {
@@ -287,7 +285,7 @@ export class TicketSellingComponent implements OnInit {
             })
          })
       })
-   }
+   }*/
 
    getFreeSeatsCount(placesList: string): number {
       return placesList.split(',').length
