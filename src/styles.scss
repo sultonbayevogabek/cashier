@@ -480,3 +480,32 @@ th {
    background-size: 9px;
    background-position: center;
 }
+
+/* SCHEMES STYLES */
+#frame {
+   fill: #D2D7DD
+}
+
+#areas {
+   fill: #EDEEEF
+}
+
+#suitcase, #restroom, #driver-m {
+   fill: #8090A0
+}
+
+.seat {
+   text {
+      white-space: pre;
+      font-size: 14px;
+      color: #8090A0;
+   }
+
+   g path:first-child {
+      fill: white;
+   }
+
+   g path:last-child {
+      fill: #8090A0;
+   }
+}

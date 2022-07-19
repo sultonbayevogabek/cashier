@@ -290,4 +290,8 @@ export class TicketSellingComponent implements OnInit {
    getFreeSeatsCount(placesList: string): number {
       return placesList.split(',').length
    }
+
+   openCarSchemeModal() {
+      this.carSchemeModalOpen = true
+   }
 }

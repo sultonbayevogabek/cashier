@@ -17,7 +17,8 @@ import { TrainScheduleComponent } from './train-schedule/train-schedule.componen
 import { SettingsComponent } from './settings/settings.component'
 import { TicketReportsComponent } from './ticket-reports/ticket-reports.component'
 import { DataEntryComponent } from './data-entry/data-entry.component'
-import { TextMaskModule } from 'angular2-text-mask'
+import { TextMaskModule } from 'angular2-text-mask';
+import { NotStandard11Component } from './shared/schemes/not-standard11/not-standard11.component'
 
 @NgModule({
    declarations: [
@@ -34,7 +35,7 @@ import { TextMaskModule } from 'angular2-text-mask'
       SettingsComponent,
       TicketReportsComponent,
       DataEntryComponent,
-      
+      NotStandard11Component
    ],
    imports: [
       CabinetRoutingModule,
