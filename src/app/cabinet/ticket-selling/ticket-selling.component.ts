@@ -4,6 +4,7 @@ import { Title } from '@angular/platform-browser'
 import { removeNonNumerics } from '../shared/functions/remove-non-numerics.function'
 import { ToastrService } from 'ngx-toastr'
 import { ApiService } from 'src/app/shared/services/api.service'
+import { getNotStandardCar } from '../shared/functions/get-not-standard.function'
 
 @Component({
    selector: 'app-ticket-selling',
@@ -56,6 +57,9 @@ export class TicketSellingComponent implements OnInit {
 
    /* CAR SCHEME */
    public carSchemeModalOpen = false
+   public freeSeatsList = ''
+   public notStandard: any = null
+   public carType = ''
 
    constructor(
       public dateService: DatesService,
@@ -269,29 +273,40 @@ export class TicketSellingComponent implements OnInit {
       this.apiService.getAvailablePlacesApi(searchingData).subscribe(res => {
          if (direction === 'Forward') {
             this.forwardAvailableCarTypes = res.direction[0].trains[0].train.cars.filter((i: any) => i.type === carType)
+            console.log(this.forwardAvailableCarTypes)
          }
          if (direction === 'Backward') {
             this.backwardAvailableCarTypes = res.direction[0].trains[0].train.cars.filter((i: any) => i.type === carType)
          }
-      }, _ => {})
-   }
-
-   /*setActiveCarType(): void {
-      ['.car-type--forward', '.car-type--backward'].forEach(className => {
-         document.querySelectorAll(className).forEach(item => {
-            item.addEventListener('click', e => {
-               document.querySelectorAll(className).forEach(el => el.classList.remove('active'))
-               item.classList.add('active')
-            })
-         })
+      }, _ => {
       })
-   }*/
+   }
 
    getFreeSeatsCount(placesList: string): number {
       return placesList.split(',').length
    }
 
-   openCarSchemeModal() {
+   openCarSchemeModal(
+      trainBrand: string,
+      carNumber: string,
+      trainNumber: string,
+      classService: string,
+      seatsCount: string,
+      carType: string,
+      places: string
+   ) {
       this.carSchemeModalOpen = true
+      this.carType = carType
+      this.notStandard = getNotStandardCar(
+         trainBrand,
+         parseInt(carNumber),
+         trainNumber,
+         classService,
+         parseInt(seatsCount),
+         carType
+      )
+      console.log(this.notStandard)
    }
+
+   /* CAR SCHEME */
 }

@@ -490,15 +490,17 @@ th {
    fill: #EDEEEF
 }
 
-#suitcase, #restroom, #driver-m {
+#suitcase, #restroom, #driver-m, #disability, #cup, #recycling-bin {
    fill: #8090A0
 }
 
-.seat {
+.seat--free {
+   cursor: pointer;
+
    text {
       white-space: pre;
       font-size: 14px;
-      color: #8090A0;
+      fill: #8090A0;
    }
 
    g path:first-child {
@@ -507,5 +509,41 @@ th {
 
    g path:last-child {
       fill: #8090A0;
+   }
+}
+
+.seat--reserved {
+   cursor: not-allowed;
+
+   text {
+      white-space: pre;
+      font-size: 14px;
+      fill: #8090A0;
+   }
+
+   g path:first-child {
+      fill: #EDEEEF;
+   }
+
+   g path:last-child {
+      fill: #D2D7DD;
+   }
+}
+
+.seat--selected {
+   cursor: pointer;
+
+   text {
+      white-space: pre;
+      font-size: 14px;
+      fill: #187CEE;
+   }
+
+   g path:first-child {
+      fill: #DCEBFD;
+   }
+
+   g path:last-child {
+      fill: #187CEE;
    }
 }
