@@ -11,5 +11,4 @@ export class EconomClassComponent implements OnInit {
 
   ngOnInit(): void {
   }
-
 }

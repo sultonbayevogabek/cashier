@@ -134,7 +134,7 @@
    cursor: pointer;
 }
 
-.trains {
+.trains__list {
    display: grid;
    grid-template-columns: calc(100% - 320px) 300px;
    grid-gap: 20px;
@@ -206,8 +206,7 @@
 }
 
 .train__info {
-   width: 20%;
-   margin-right: 30px;
+   margin-right: 40px;
    flex-shrink: 0;
 
    strong {
@@ -240,7 +239,7 @@
    strong {
       display: block;
       font-weight: 700;
-      font-size: 16px;
+      font-size: 18px;
       line-height: 24px;
    }
 
@@ -414,14 +413,38 @@
 }
 
 .car-scheme {
-   max-width: 1000px;
-   width: 1000px;
+   position: fixed;
+   top: 0;
+   bottom: 0;
+   right: -100%;
+   z-index: 5;
+   display: flex;
+   justify-content: flex-end;
+   align-items: flex-start;
+   width: 100%;
+   transition: all 0.5s ease;
+
+   &--open {
+      right: 0;
+   }
+}
+
+.car-scheme__card {
+   display: flex;
+   flex-direction: column;
+   justify-content: space-between;
    padding: 20px;
    background-color: #fff;
-   box-shadow: 0 0 10px rgb(0 0 0 / 5%);
-   border-radius: 10px;
+   box-shadow: -5px 8px 15px rgb(0 0 0 / 10%);
+   border-radius: 0 0 0 5px;
 
    svg {
-      width: 100%;
+      width: 1000px !important;
    }
+}
+
+.car-scheme__actions {
+   display: flex;
+   justify-content: flex-end;
+   padding-top: 20px;
 }

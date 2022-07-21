@@ -91,8 +91,8 @@
    </div>
 
    <div class="trains">
-      <div class="trains__list list">
-         <div class="app-card" *ngIf="forwardTrains.length">
+      <div class="trains__list list" *ngIf="forwardTrains.length">
+         <div class="app-card">
             <h2 class="list__heading">Найдено {{ forwardTrains.length }} вариантов для туда</h2>
 
             <ul class="list__ul">
@@ -160,15 +160,16 @@
                                  <svg
                                     class="car__scheme"
                                     (click)="openCarSchemeModal(
-                                       car.typeOfCarSchema.barndName,
-                                       car.typeOfCarSchema.carNumber,
+                                       train.brand,
+                                       car.number,
                                        train.number,
-                                       car.typeOfCarSchema.classService,
-                                       car.typeOfCarSchema.seatsCount,
-                                       carType.type,
+                                       carType.classService.type,
+                                       car.typeOfCarSchema?.seatsCount,
+                                       carType.typeShow,
                                        car.places
                                     )"
-                                    width="35" height="18" viewBox="0 0 35 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    width="35" height="18" viewBox="0 0 35 18" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
                                     <rect x="0.5" y="0.5" width="34" height="17" rx="2.5" fill="#EEF0F5"/>
                                     <path fill-rule="evenodd" clip-rule="evenodd"
                                           d="M5 4C4.44772 4 4 4.44772 4 5V6C4 6.55228 4.44772 7 5 7H6C6.55228 7 7 6.55228 7 6V5C7 4.44772 6.55228 4 6 4H5ZM5 11C4.44772 11 4 11.4477 4 12V13C4 13.5523 4.44772 14 5 14H6C6.55228 14 7 13.5523 7 13V12C7 11.4477 6.55228 11 6 11H5Z"
@@ -220,7 +221,28 @@
             </ul>
          </div>
 
-         <div class="app-card" *ngIf="backwardTrains.length">
+         <div class="trains__filter filter">
+            <div class="app-card">
+               <h2 class="app-card__heading">{{ passRouteForward.from }} → {{ passRouteForward.to }}</h2>
+               <div class="filter__section">
+                  <h3 class="filter__heading">Тип вагона</h3>
+                  <ul class="filter__options options">
+                     <li class="options__item" *ngFor="let filterItem of forwardAvailableCarTypesFilter">
+                        <label class="options__label cursor-pointer">
+                           <input class="custom-checkbox-input" type="checkbox" (input)="filterTrains(filterItem.carType, 'Forward')">
+                           <span class="custom-checkbox-rect"></span>
+                           <span class="options__text">{{ filterItem.carType }}</span>
+                           <span class="options__badge">{{ filterItem.freeSeats }}</span>
+                        </label>
+                     </li>
+                  </ul>
+               </div>
+               <img class="d-none" src="/assets/img/checked.svg" alt="">
+            </div>
+         </div>
+      </div>
+      <div class="trains__list list" *ngIf="backwardTrains.length">
+         <div class="app-card">
             <h2 class="list__heading">Найдено {{ backwardTrains.length }} вариантов для обратно</h2>
 
             <ul class="list__ul">
@@ -285,7 +307,15 @@
                                  <span class="mini">вагон</span>
                               </div>
                               <div>
-                                 <svg class="car__scheme" width="35" height="18" viewBox="0 0 35 18" fill="none"
+                                 <svg class="car__scheme" (click)="openCarSchemeModal(
+                                       train.brand,
+                                       car.number,
+                                       train.number,
+                                       carType.classService.type,
+                                       car.typeOfCarSchema?.seatsCount,
+                                       carType.typeShow,
+                                       car.places
+                                    )" width="35" height="18" viewBox="0 0 35 18" fill="none"
                                       xmlns="http://www.w3.org/2000/svg">
                                     <rect x="0.5" y="0.5" width="34" height="17" rx="2.5" fill="#EEF0F5"/>
                                     <path fill-rule="evenodd" clip-rule="evenodd"
@@ -337,102 +367,23 @@
                </li>
             </ul>
          </div>
-      </div>
-
-      <div class="trains__filter filter">
-         <div class="app-card">
-            <h2 class="app-card__heading">Фильтр</h2>
-            <div class="filter__section">
-               <h3 class="filter__heading">Тип вагона</h3>
-               <ul class="filter__options options">
-                  <li class="options__item">
-                     <label class="options__label cursor-pointer">
-                        <input class="custom-checkbox-input" type="checkbox">
-                        <span class="custom-checkbox-rect"></span>
-                        <span class="options__text">Общий вагон</span>
-                        <span class="options__badge">
-                        234
-                     </span>
-                     </label>
-                  </li>
-                  <li class="options__item">
-                     <label class="options__label cursor-pointer">
-                        <input class="custom-checkbox-input" type="checkbox">
-                        <span class="custom-checkbox-rect"></span>
-                        <span class="options__text">Сидячий вагон</span>
-                        <span class="options__badge">
-                        112
-                     </span>
-                     </label>
-                  </li>
-                  <li class="options__item">
-                     <label class="options__label cursor-pointer">
-                        <input class="custom-checkbox-input" type="checkbox">
-                        <span class="custom-checkbox-rect"></span>
-                        <span class="options__text">Люкс вагон</span>
-                        <span class="options__badge">
-                        45
-                     </span>
-                     </label>
-                  </li>
-                  <li class="options__item">
-                     <label class="options__label cursor-pointer">
-                        <input class="custom-checkbox-input" type="checkbox">
-                        <span class="custom-checkbox-rect"></span>
-                        <span class="options__text">Мягкий вагон</span>
-                        <span class="options__badge">
-                        65
-                     </span>
-                     </label>
-                  </li>
-                  <li class="options__item">
-                     <label class="options__label cursor-pointer">
-                        <input class="custom-checkbox-input" type="checkbox">
-                        <span class="custom-checkbox-rect"></span>
-                        <span class="options__text">Купе вагон</span>
-                        <span class="options__badge">
-                        32
-                     </span>
-                     </label>
-                  </li>
-               </ul>
+         <div class="trains__filter filter">
+            <div class="app-card">
+               <h2 class="app-card__heading"><h2 class="app-card__heading">{{ passRouteForward.to }} → {{ passRouteForward.from }}</h2></h2>
+               <div class="filter__section">
+                  <h3 class="filter__heading">Тип вагона</h3>
+                  <ul class="filter__options options">
+                     <li class="options__item" *ngFor="let filterItem of backwardAvailableCarTypesFilter">
+                        <label class="options__label cursor-pointer">
+                           <input class="custom-checkbox-input" type="checkbox" (input)="filterTrains(filterItem.carType, 'Backward')">
+                           <span class="custom-checkbox-rect"></span>
+                           <span class="options__text">{{ filterItem.carType }}</span>
+                           <span class="options__badge">{{ filterItem.freeSeats }}</span>
+                        </label>
+                     </li>
+                  </ul>
+               </div>
             </div>
-            <div class="filter__section">
-               <h3 class="filter__heading">Места</h3>
-               <ul class="filter__options options">
-                  <li class="options__item">
-                     <label class="options__label cursor-pointer">
-                        <input class="custom-checkbox-input" type="checkbox">
-                        <span class="custom-checkbox-rect"></span>
-                        <span class="options__text">Верхние</span>
-                        <span class="options__badge">
-                        234
-                     </span>
-                     </label>
-                  </li>
-                  <li class="options__item">
-                     <label class="options__label cursor-pointer">
-                        <input class="custom-checkbox-input" type="checkbox">
-                        <span class="custom-checkbox-rect"></span>
-                        <span class="options__text">Нижние</span>
-                        <span class="options__badge">
-                        112
-                     </span>
-                     </label>
-                  </li>
-                  <li class="options__item">
-                     <label class="options__label cursor-pointer">
-                        <input class="custom-checkbox-input" type="checkbox">
-                        <span class="custom-checkbox-rect"></span>
-                        <span class="options__text">Возле окна</span>
-                        <span class="options__badge">
-                        45
-                     </span>
-                     </label>
-                  </li>
-               </ul>
-            </div>
-            <img class="d-none" src="/assets/img/checked.svg" alt="">
          </div>
       </div>
    </div>
@@ -443,52 +394,34 @@
    <button [routerLink]="['/cabinet/data-entry']" class="button button--blue btn">Продолжить</button>
 </div>
 
-<div class="modal-layer" *ngIf="carSchemeModalOpen">
-   <div class="car-scheme">
+<div class="car-scheme" [class.car-scheme--open]="carSchemePanelOpen">
+   <div class="car-scheme__card">
       <app-seated *ngIf="(carType === 'Сидячий' || carType === 'Общий') && !notStandard"></app-seated>
-
       <app-econom-class *ngIf="carType === 'Плацкартный' && !notStandard"></app-econom-class>
-
       <app-coupe *ngIf="carType === 'Купе' && !notStandard"></app-coupe>
-
       <app-soft *ngIf="carType === 'Мягкий' && !notStandard"></app-soft>
-
       <app-luxury20 *ngIf="carType === 'СВ' && !notStandard"></app-luxury20>
-
       <app-not-standard10 *ngIf="notStandard === 10"></app-not-standard10>
-
       <app-not-standard11 *ngIf="notStandard === 11"></app-not-standard11>
-
       <app-not-standard12 *ngIf="notStandard === 12"></app-not-standard12>
-
       <app-not-standard13 *ngIf="notStandard === 13"></app-not-standard13>
-
       <app-not-standard14 *ngIf="notStandard === 14"></app-not-standard14>
-
       <app-not-standard15 *ngIf="notStandard === 15"></app-not-standard15>
-
       <app-not-standard16 *ngIf="notStandard === 16"></app-not-standard16>
-
       <app-not-standard17 *ngIf="notStandard === 17"></app-not-standard17>
-
       <app-not-standard18 *ngIf="notStandard === 18"></app-not-standard18>
-
       <app-not-standard19 *ngIf="notStandard === 19"></app-not-standard19>
-
       <app-not-standard20 *ngIf="notStandard === 20"></app-not-standard20>
-
       <app-not-standard21 *ngIf="notStandard === 21"></app-not-standard21>
-
       <app-not-standard22 *ngIf="notStandard === 22"></app-not-standard22>
-
       <app-not-standard23 *ngIf="notStandard === 23"></app-not-standard23>
-
       <app-not-standard24 *ngIf="notStandard === 24"></app-not-standard24>
-
       <app-not-standard25 *ngIf="notStandard === 25"></app-not-standard25>
-
       <app-not-standard26 *ngIf="notStandard === 26"></app-not-standard26>
-
       <app-not-standard27 *ngIf="notStandard === 27"></app-not-standard27>
+      <div class="car-scheme__actions">
+         <button class="button button--red btn mr-20" (click)="carSchemePanelOpen = false">Отменить</button>
+         <button class="button button--blue btn">Продолжить</button>
+      </div>
    </div>
 </div>

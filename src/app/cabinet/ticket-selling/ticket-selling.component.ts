@@ -1,10 +1,21 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core'
+import {
+   Component,
+   DoCheck,
+   ElementRef,
+   OnInit,
+   KeyValueDiffers,
+   KeyValueDiffer,
+   ViewChild,
+   QueryList,
+   ViewChildren
+} from '@angular/core'
 import { DatesService } from '../shared/services/dates.service'
 import { Title } from '@angular/platform-browser'
 import { removeNonNumerics } from '../shared/functions/remove-non-numerics.function'
 import { ToastrService } from 'ngx-toastr'
 import { ApiService } from 'src/app/shared/services/api.service'
 import { getNotStandardCar } from '../shared/functions/get-not-standard.function'
+import { markFreeReservedSeats } from '../shared/functions/mark-free-reserved-seats.function'
 
 @Component({
    selector: 'app-ticket-selling',
@@ -12,16 +23,16 @@ import { getNotStandardCar } from '../shared/functions/get-not-standard.function
    styleUrls: ['./ticket-selling.component.scss']
 })
 
-export class TicketSellingComponent implements OnInit {
+export class TicketSellingComponent implements OnInit, DoCheck {
    /* SEARCH PANEL */
    public isChrome = true
 
-   public departureStationCode = ''
-   public departureStationValue = ''
+   public departureStationCode = '2900000'
+   public departureStationValue = 'ТАШКЕНТ'
    public departureStationInputFocus = false
 
-   public arrivalStationCode = ''
-   public arrivalStationValue = ''
+   public arrivalStationCode = '2900700'
+   public arrivalStationValue = 'САМАРКАНД'
    public arrivalStationInputFocus = false
 
    public searchingStationList: Array<any> = []
@@ -50,24 +61,29 @@ export class TicketSellingComponent implements OnInit {
    /* TRAINS LIST */
    public forwardTrains: Array<any> = []
    public forwardAvailableCarTypes: Array<any> = []
+   public forwardAvailableCarTypesFilter: Array<any> = []
    public backwardTrains: Array<any> = []
    public backwardAvailableCarTypes: Array<any> = []
+   public backwardAvailableCarTypesFilter: Array<any> = []
    public passRouteForward: any
    public passRouteBackward: any
 
    /* CAR SCHEME */
-   public carSchemeModalOpen = false
-   public freeSeatsList = ''
+   public carSchemePanelOpen = false
+   public freeSeatsList: Array<any> = []
    public notStandard: any = null
    public carType = ''
 
+   differ: KeyValueDiffer<string, any>
    constructor(
       public dateService: DatesService,
       private title: Title,
       private toasterService: ToastrService,
-      private apiService: ApiService
+      private apiService: ApiService,
+      private differs: KeyValueDiffers
    ) {
       this.title.setTitle('Продажа билетов')
+      this.differ = this.differs.find({}).create()
    }
 
    ngOnInit(): void {
@@ -75,6 +91,15 @@ export class TicketSellingComponent implements OnInit {
          this.isChrome = false
       }
       this.departureStationInput.nativeElement.focus()
+   }
+
+   ngDoCheck() {
+      const change = this.differ.diff(this)
+      if (change) {
+         change.forEachChangedItem(item => {
+
+         })
+      }
    }
 
    /* SEARCH PANEL */
@@ -208,11 +233,13 @@ export class TicketSellingComponent implements OnInit {
          if (res.express.direction[0].trains && res.express.direction[0].trains[0].train.length) {
             this.forwardTrains = res.express.direction[0].trains[0].train
             this.passRouteForward = res.express.direction[0].passRoute
+            this.createTrainsFilterData(this.forwardTrains, this.forwardAvailableCarTypesFilter)
          }
 
          if (res.express.direction[1]?.trains && res.express.direction[1]?.trains[0].train.length) {
             this.backwardTrains = res.express.direction[1].trains[0].train
             this.passRouteBackward = res.express.direction[1].passRoute
+            this.createTrainsFilterData(this.backwardTrains, this.backwardAvailableCarTypesFilter)
          }
       })
    }
@@ -229,6 +256,42 @@ export class TicketSellingComponent implements OnInit {
          })
       })
       return carTypes
+   }
+
+   createTrainsFilterData(trainsArray: Array<any>, filterArray: Array<any>) {
+      trainsArray.forEach((train: any) => {
+         train.places.cars.forEach((carType: any) => {
+            const index = filterArray.findIndex((item: any) => item.carType === carType.type)
+            if (index > -1) {
+               filterArray[index].freeSeats += +carType.freeSeats
+               return
+            }
+            filterArray.push({
+               carType: carType.type,
+               freeSeats: +carType.freeSeats,
+               active: false
+            })
+         })
+      })
+   }
+
+   filterTrains(carType: string, direction: string) {
+      if (direction === 'Forward') {
+         const idx = this.forwardAvailableCarTypesFilter.findIndex((i: any) => i.carType === carType)
+         this.forwardAvailableCarTypesFilter[idx].active = !this.forwardAvailableCarTypesFilter[idx].active
+         if (this.forwardAvailableCarTypesFilter.some((i: any) => i.active)) {
+            this.forwardAvailableCarTypesFilter.forEach((j: any) => {
+               if (j.active) {
+                  console.log(j)
+               }
+            })
+         } else {
+            console.log('NO')
+         }
+         return
+      }
+      const idx = this.backwardAvailableCarTypesFilter.findIndex((i: any) => i.carType === carType)
+      this.backwardAvailableCarTypesFilter[idx].active = !this.backwardAvailableCarTypesFilter[idx].active
    }
 
    getAvailablePlaces(trainNumber: string, direction: string, carType: string, i: number) {
@@ -267,13 +330,11 @@ export class TicketSellingComponent implements OnInit {
             }
          ],
          stationFrom: direction === 'Forward' ? this.departureStationCode : this.arrivalStationCode,
-         stationTo: direction !== 'Backward' ? this.arrivalStationCode : this.departureStationCode,
-         detailNumPlaces: 1
+         stationTo: direction !== 'Backward' ? this.arrivalStationCode : this.departureStationCode
       }
       this.apiService.getAvailablePlacesApi(searchingData).subscribe(res => {
          if (direction === 'Forward') {
             this.forwardAvailableCarTypes = res.direction[0].trains[0].train.cars.filter((i: any) => i.type === carType)
-            console.log(this.forwardAvailableCarTypes)
          }
          if (direction === 'Backward') {
             this.backwardAvailableCarTypes = res.direction[0].trains[0].train.cars.filter((i: any) => i.type === carType)
@@ -295,8 +356,9 @@ export class TicketSellingComponent implements OnInit {
       carType: string,
       places: string
    ) {
-      this.carSchemeModalOpen = true
+      this.carSchemePanelOpen = true
       this.carType = carType
+      this.freeSeatsList = places.split(',')
       this.notStandard = getNotStandardCar(
          trainBrand,
          parseInt(carNumber),
@@ -305,7 +367,6 @@ export class TicketSellingComponent implements OnInit {
          parseInt(seatsCount),
          carType
       )
-      console.log(this.notStandard)
    }
 
    /* CAR SCHEME */

@@ -482,6 +482,10 @@ th {
 }
 
 /* SCHEMES STYLES */
+.scheme {
+   max-width: 100%;
+}
+
 #frame {
    fill: #D2D7DD
 }
@@ -494,7 +498,7 @@ th {
    fill: #8090A0
 }
 
-.seat--free {
+.seat {
    cursor: pointer;
 
    text {
