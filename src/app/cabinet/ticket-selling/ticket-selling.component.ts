@@ -1,10 +1,7 @@
 import {
    Component,
-   DoCheck,
    ElementRef,
    OnInit,
-   KeyValueDiffers,
-   KeyValueDiffer,
    ViewChild,
    QueryList,
    ViewChildren
@@ -23,7 +20,7 @@ import { markFreeReservedSeats } from '../shared/functions/mark-free-reserved-se
    styleUrls: ['./ticket-selling.component.scss']
 })
 
-export class TicketSellingComponent implements OnInit, DoCheck {
+export class TicketSellingComponent implements OnInit {
    /* SEARCH PANEL */
    public isChrome = true
 
@@ -60,9 +57,11 @@ export class TicketSellingComponent implements OnInit, DoCheck {
 
    /* TRAINS LIST */
    public forwardTrains: Array<any> = []
+   public forwardTrainsClone: Array<any> = []
    public forwardAvailableCarTypes: Array<any> = []
    public forwardAvailableCarTypesFilter: Array<any> = []
    public backwardTrains: Array<any> = []
+   public backwardTrainsClone: Array<any> = []
    public backwardAvailableCarTypes: Array<any> = []
    public backwardAvailableCarTypesFilter: Array<any> = []
    public passRouteForward: any
@@ -74,16 +73,13 @@ export class TicketSellingComponent implements OnInit, DoCheck {
    public notStandard: any = null
    public carType = ''
 
-   differ: KeyValueDiffer<string, any>
    constructor(
       public dateService: DatesService,
       private title: Title,
       private toasterService: ToastrService,
-      private apiService: ApiService,
-      private differs: KeyValueDiffers
+      private apiService: ApiService
    ) {
       this.title.setTitle('Продажа билетов')
-      this.differ = this.differs.find({}).create()
    }
 
    ngOnInit(): void {
@@ -91,15 +87,7 @@ export class TicketSellingComponent implements OnInit, DoCheck {
          this.isChrome = false
       }
       this.departureStationInput.nativeElement.focus()
-   }
-
-   ngDoCheck() {
-      const change = this.differ.diff(this)
-      if (change) {
-         change.forEachChangedItem(item => {
-
-         })
-      }
+      this.getTrains()
    }
 
    /* SEARCH PANEL */
@@ -231,13 +219,13 @@ export class TicketSellingComponent implements OnInit, DoCheck {
 
       this.apiService.getTrainsListApi(searchingData).subscribe(res => {
          if (res.express.direction[0].trains && res.express.direction[0].trains[0].train.length) {
-            this.forwardTrains = res.express.direction[0].trains[0].train
+            this.forwardTrains = this.forwardTrainsClone = res.express.direction[0].trains[0].train
             this.passRouteForward = res.express.direction[0].passRoute
             this.createTrainsFilterData(this.forwardTrains, this.forwardAvailableCarTypesFilter)
          }
 
          if (res.express.direction[1]?.trains && res.express.direction[1]?.trains[0].train.length) {
-            this.backwardTrains = res.express.direction[1].trains[0].train
+            this.backwardTrains = this.backwardTrainsClone = res.express.direction[1].trains[0].train
             this.passRouteBackward = res.express.direction[1].passRoute
             this.createTrainsFilterData(this.backwardTrains, this.backwardAvailableCarTypesFilter)
          }
@@ -279,19 +267,39 @@ export class TicketSellingComponent implements OnInit, DoCheck {
       if (direction === 'Forward') {
          const idx = this.forwardAvailableCarTypesFilter.findIndex((i: any) => i.carType === carType)
          this.forwardAvailableCarTypesFilter[idx].active = !this.forwardAvailableCarTypesFilter[idx].active
+         const tempTrains: Array<any> = []
          if (this.forwardAvailableCarTypesFilter.some((i: any) => i.active)) {
-            this.forwardAvailableCarTypesFilter.forEach((j: any) => {
-               if (j.active) {
-                  console.log(j)
+            this.forwardAvailableCarTypesFilter.forEach((item: any) => {
+               if (item.active) {
+                  this.forwardTrainsClone.forEach((train: any) => {
+                     if (train.places.cars.findIndex((i: any) => i.type === item.carType) > -1 && !tempTrains.some((i: any) => i.number === train.number)) {
+                        tempTrains.push(train)
+                     }
+                  })
                }
             })
+            this.forwardTrains = tempTrains
          } else {
-            console.log('NO')
+            this.forwardTrains = this.forwardTrainsClone
          }
-         return
       }
       const idx = this.backwardAvailableCarTypesFilter.findIndex((i: any) => i.carType === carType)
       this.backwardAvailableCarTypesFilter[idx].active = !this.backwardAvailableCarTypesFilter[idx].active
+      const tempTrains: Array<any> = []
+      if (this.backwardAvailableCarTypesFilter.some((i: any) => i.active)) {
+         this.backwardAvailableCarTypesFilter.forEach((item: any) => {
+            if (item.active) {
+               this.backwardTrainsClone.forEach((train: any) => {
+                  if (train.places.cars.findIndex((i: any) => i.type === item.carType) > -1 && !tempTrains.some((i: any) => i.number === train.number)) {
+                     tempTrains.push(train)
+                  }
+               })
+            }
+         })
+         this.backwardTrains = tempTrains
+      } else {
+         this.backwardTrains = this.backwardTrainsClone
+      }
    }
 
    getAvailablePlaces(trainNumber: string, direction: string, carType: string, i: number) {
