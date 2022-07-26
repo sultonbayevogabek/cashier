@@ -947,6 +947,12 @@ export class DataEntryComponent implements OnInit {
       country: new FormControl('UZB', [Validators.required]),
    })
 
+   public data: any = null
+   public selectedForwardTrain: any = null
+   public selectedBackwardTrain: any = null
+   public passRouteForward: any = null
+   public passRouteBackward: any = null
+
    constructor(
       private apiService: ApiService,
       private toaster: ToastrService
@@ -958,6 +964,22 @@ export class DataEntryComponent implements OnInit {
             this.isModalOpen = false
          }
       })
+
+      if (localStorage.getItem('data')) {
+         this.data = JSON.parse(localStorage.getItem('data') || '')
+      }
+      if (localStorage.getItem('selectedForwardTrain')) {
+         this.selectedForwardTrain = JSON.parse(localStorage.getItem('selectedForwardTrain') || '')
+      }
+      if (localStorage.getItem('selectedBackwardTrain')) {
+         this.selectedBackwardTrain = JSON.parse(localStorage.getItem('selectedBackwardTrain') || '')
+      }
+      if (localStorage.getItem('passRouteForward')) {
+         this.passRouteForward = JSON.parse(localStorage.getItem('passRouteForward') || '')
+      }
+      if (localStorage.getItem('passRouteBackward')) {
+         this.passRouteBackward = JSON.parse(localStorage.getItem('passRouteBackward') || '')
+      }
    }
 
    scanDocument() {

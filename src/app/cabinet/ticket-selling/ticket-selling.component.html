@@ -158,7 +158,7 @@
                         <div class="car"
                              [class.active]="car.selected"
                              *ngFor="let car of carType.car | sortCars"
-                             (click)="selectCar(train.number, carType.type, car.number, car.places, 'Forward'); car.selected = true">
+                             (click)="selectCar(train, carType.type, car.number, car.places, 'Forward'); car.selected = true">
                            <div class="car__header">
                               <div>
                                  <strong class="bold">{{ car.number }}</strong>
@@ -318,7 +318,7 @@
                         <div class="car"
                              [class.active]="car.selected"
                              *ngFor="let car of carType.car | sortCars"
-                             (click)="selectCar(train.number, carType.type, car.number, car.places, 'Backward'); car.selected = true"
+                             (click)="selectCar(train, carType.type, car.number, car.places, 'Backward'); car.selected = true"
                         >
                            <div class="car__header">
                               <div>

@@ -62,11 +62,13 @@ export class TicketSellingComponent implements OnInit {
    public forwardAvailableCarTypesFilter: Array<any> = []
    public selectedForwardCarType = ''
    public selectedForwardCar: any = null
+
    public backwardTrains: Array<any> = []
    public backwardTrainsClone: Array<any> = []
    public backwardAvailableCarTypesFilter: Array<any> = []
    public selectedBackwardCarType = ''
    public selectedBackwardCar: any = null
+
    public passRouteForward: any
    public passRouteBackward: any
 
@@ -228,12 +230,14 @@ export class TicketSellingComponent implements OnInit {
          if (res.express.direction[0].trains && res.express.direction[0].trains[0].train.length) {
             this.forwardTrains = this.forwardTrainsClone = res.express.direction[0].trains[0].train
             this.passRouteForward = res.express.direction[0].passRoute
+            localStorage.setItem('passRouteForward', JSON.stringify(this.passRouteForward))
             this.createTrainsFilterData(this.forwardTrains, this.forwardAvailableCarTypesFilter)
          }
 
          if (res.express.direction[1]?.trains && res.express.direction[1]?.trains[0].train.length) {
             this.backwardTrains = this.backwardTrainsClone = res.express.direction[1].trains[0].train
             this.passRouteBackward = res.express.direction[1].passRoute
+            localStorage.setItem('passRouteBackward', JSON.stringify(this.passRouteBackward))
             this.createTrainsFilterData(this.backwardTrains, this.backwardAvailableCarTypesFilter)
          }
       })
@@ -355,7 +359,8 @@ export class TicketSellingComponent implements OnInit {
          }
          this.apiService.getAvailablePlacesApi(searchingData).subscribe(res => {
             train.availableCarTypes = res.direction[0].trains[0].train.cars
-         }, _ => {})
+         }, _ => {
+         })
       }
    }
 
@@ -363,11 +368,11 @@ export class TicketSellingComponent implements OnInit {
       return placesList.split(',').length
    }
 
-   selectCar(trainNumber: string, carType: string, carNumber: string, carPlaces: string, direction: string) {
+   selectCar(train: any, carType: string, carNumber: string, carPlaces: string, direction: string) {
       const freeSeats = carPlaces.split(',')
       const carData = {
          train: {
-            number: trainNumber
+            number: train.number
          },
          car: {
             type: carType,
@@ -378,7 +383,14 @@ export class TicketSellingComponent implements OnInit {
          }
       }
       this.unSelectAllCars(direction)
-      direction === 'Forward' ? this.selectedForwardCar = carData : this.selectedBackwardCar = carData
+
+      if (direction === 'Forward') {
+         this.selectedForwardCar = carData
+         localStorage.setItem('selectedForwardTrain', JSON.stringify(train))
+      } else {
+         this.selectedBackwardCar = carData
+         localStorage.setItem('selectedBackwardTrain', JSON.stringify(train))
+      }
    }
 
    unSelectAllCars(direction: string) {
@@ -448,7 +460,7 @@ export class TicketSellingComponent implements OnInit {
          ],
          withInsurance: false,
          withSmsNotification: false,
-         phone: "998",
+         phone: '998',
          passengers: []
       }
 
@@ -459,6 +471,9 @@ export class TicketSellingComponent implements OnInit {
             depDate: this.dateService.formatDateWithDot(this.backwardDate),
             ...this.selectedBackwardCar
          })
+      } else {
+         localStorage.removeItem('selectedBackwardTrain')
+         localStorage.removeItem('passRouteBackward')
       }
 
       localStorage.setItem('data', JSON.stringify(data))

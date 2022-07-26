@@ -3,64 +3,56 @@
       <h2 class="app-card__heading">Ввод данных пассажиров</h2>
 
       <div class="info">
-         <div class="info__card">
+         <div class="info__card" *ngIf="selectedForwardTrain">
             <div class="info__item">
                <strong>Маршрут туда:</strong>
-               <span>ТАШКЕНТ → КЫЗЫЛТЕПА</span>
+               <span>{{ passRouteForward.from }} → {{ passRouteForward.to }}</span>
             </div>
             <div class="info__item">
                <strong>Поезд:</strong>
-               <span>072Ф (СК) (ЭР) / ТАШКЕНТ ЮЖ — АЛАТ / УТИ</span>
+               <span>{{ selectedForwardTrain.number }} ({{ selectedForwardTrain.type }}) ({{ selectedForwardTrain.brand }}) / {{ selectedForwardTrain.route.station[0] }} — {{ selectedForwardTrain.route.station[1] }}</span>
             </div>
             <div class="info__item">
                <strong>Отправление:</strong>
-               <span>вт 25 май 2021 / 22:15 / ТАШКЕНТ</span>
+               <span>{{ selectedForwardTrain.departure.localDate }} / {{ selectedForwardTrain.departure.localTime }}</span>
             </div>
             <div class="info__item">
                <strong>Прибытие:</strong>
-               <span>ср 26 май 2021 / 05:40 / КЫЗЫЛТЕПА</span>
+               <span>{{ selectedForwardTrain.arrival.localDate }} / {{ selectedForwardTrain.arrival.localTime }}</span>
             </div>
             <div class="info__item">
                <strong>Время в пути:</strong>
-               <span>7 часов 25 минут</span>
+               <span>{{ selectedForwardTrain.timeInWay }}</span>
             </div>
             <div class="info__item">
                <strong>Вагон:</strong>
-               <span>№ 02, купе.</span>
-            </div>
-            <div class="info__item">
-               <strong>Выбранные места:</strong>
-               <span>20, 21 (1 верхнее, 1 нижнее), с бельем.</span>
+               <span>№ {{ data.ordersRequest[0].car.number }}, {{ data.ordersRequest[0].car.type | lowercase }}.</span>
             </div>
          </div>
-         <div class="info__card">
+         <div class="info__card" *ngIf="selectedBackwardTrain">
             <div class="info__item">
-               <strong>Маршрут обратно:</strong>
-               <span>КЫЗЫЛТЕПА → ТАШКЕНТ</span>
+               <strong>Маршрут туда:</strong>
+               <span>{{ passRouteBackward.from }} → {{ passRouteBackward.to }}</span>
             </div>
             <div class="info__item">
                <strong>Поезд:</strong>
-               <span>072Ф (СК) (ЭР) / ТАШКЕНТ ЮЖ — АЛАТ / УТИ</span>
+               <span>{{ selectedBackwardTrain.number }} ({{ selectedBackwardTrain.type }}) ({{ selectedBackwardTrain.brand }}) / {{ selectedForwardTrain.route.station[0] }} — {{ selectedForwardTrain.route.station[1] }}</span>
             </div>
             <div class="info__item">
                <strong>Отправление:</strong>
-               <span>вт 25 май 2021 / 22:15 / ТАШКЕНТ</span>
+               <span>{{ selectedBackwardTrain.departure.localDate }} / {{ selectedBackwardTrain.departure.localTime }}</span>
             </div>
             <div class="info__item">
                <strong>Прибытие:</strong>
-               <span>ср 26 май 2021 / 05:40 / КЫЗЫЛТЕПА</span>
+               <span>{{ selectedBackwardTrain.arrival.localDate }} / {{ selectedBackwardTrain.arrival.localTime }}</span>
             </div>
             <div class="info__item">
                <strong>Время в пути:</strong>
-               <span>7 часов 25 минут</span>
+               <span>{{ selectedBackwardTrain.timeInWay }}</span>
             </div>
             <div class="info__item">
                <strong>Вагон:</strong>
-               <span>№ 02, купе.</span>
-            </div>
-            <div class="info__item">
-               <strong>Выбранные места:</strong>
-               <span>20, 21 (1 верхнее, 1 нижнее), с бельем.</span>
+               <span>№ {{ data.ordersRequest[1].car.number }}, {{ data.ordersRequest[1].car.type | lowercase }}.</span>
             </div>
          </div>
       </div>
