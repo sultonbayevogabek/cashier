@@ -41,6 +41,8 @@ import { NotStandard17Component } from './shared/schemes/not-standard17/not-stan
 import { NotStandard19Component } from './shared/schemes/not-standard19/not-standard19.component'
 import { NotStandard25Component } from './shared/schemes/not-standard25/not-standard25.component'
 import { SoftComponent } from './shared/schemes/soft/soft.component'
+import { SortCarsPipe } from './shared/pipes/sort-cars.pipe'
+import { SortCarTypePipe } from './shared/pipes/sort-car-type.pipe'
 
 @NgModule({
    declarations: [
@@ -79,7 +81,9 @@ import { SoftComponent } from './shared/schemes/soft/soft.component'
       NotStandard17Component,
       NotStandard19Component,
       NotStandard25Component,
-      SoftComponent
+      SoftComponent,
+      SortCarsPipe,
+      SortCarTypePipe
    ],
    imports: [
       CabinetRoutingModule,

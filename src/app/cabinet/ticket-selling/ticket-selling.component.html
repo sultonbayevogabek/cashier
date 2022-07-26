@@ -97,60 +97,68 @@
 
             <ul class="list__ul">
                <li class="list__item train" *ngFor="let train of forwardTrains; let i = index">
-                  <div class="train__header">
-                     <div class="train__info">
-                        <strong>{{ train.number }} ({{ train.type }}
-                           ) {{ train.brand ? '(' + train.brand + ')' : null }}</strong>
-                        <span>{{ train.route.station[0] }} → {{ train.route.station[1] }}</span>
-                     </div>
-
-                     <div class="train__stations">
-                        <div class="station">
-                           <div class="station__date">{{ train.departure.localDate }}</div>
-                           <div>
-                              <strong class="station__time">{{ train.departure.localTime }}</strong>
-                              <span class="station__name">{{ passRouteForward.from }}</span>
+                  <div class="train__header header">
+                     <div class="header__info">
+                        <div class="train__stations">
+                           <div class="station">
+                              <div class="station__date">{{ train.departure.localDate }}</div>
+                              <div>
+                                 <strong class="station__time">{{ train.departure.localTime }}</strong>
+                                 <span class="station__name">{{ passRouteForward.from }}</span>
+                              </div>
+                           </div>
+                           <svg class="station__arrow" width="12" height="6" viewBox="0 0 12 6" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                              <path
+                                 d="M0.59375 2.8125H9.89062L8.92969 1.875V0.71875L11.4297 3.3125V3.34375L8.92969 5.9375V4.78125L9.875 3.85938H0.59375V2.8125Z"
+                                 fill="#354356"/>
+                           </svg>
+                           <div class="station">
+                              <div class="station__date">{{ train.arrival.localDate }}</div>
+                              <div>
+                                 <strong class="station__time">{{ train.arrival.localTime }}</strong>
+                                 <span class="station__name">{{ passRouteForward.to }}</span>
+                              </div>
                            </div>
                         </div>
-                        <svg class="station__arrow" width="12" height="6" viewBox="0 0 12 6" fill="none"
-                             xmlns="http://www.w3.org/2000/svg">
-                           <path
-                              d="M0.59375 2.8125H9.89062L8.92969 1.875V0.71875L11.4297 3.3125V3.34375L8.92969 5.9375V4.78125L9.875 3.85938H0.59375V2.8125Z"
-                              fill="#354356"/>
-                        </svg>
-                        <div class="station">
-                           <div class="station__date">{{ train.arrival.localDate }}</div>
-                           <div>
-                              <strong class="station__time">{{ train.arrival.localTime }}</strong>
-                              <span class="station__name">{{ passRouteForward.to }}</span>
-                           </div>
+
+                        <div class="train__time-in-way">
+                           <span>В пути</span>
+                           <strong>{{ train.timeInWay }}</strong>
+                        </div>
+
+                        <div class="train__info">
+                           <strong>{{ train.number }} ({{ train.type }}
+                              ) {{ train.brand ? '(' + train.brand + ')' : null }}</strong>
+                           <span>{{ train.route.station[0] }} → {{ train.route.station[1] }}</span>
                         </div>
                      </div>
+                     <div class="header__car-types">
+                        <div class="train__car-types" *ngIf="train.places.cars.length; else noPlace">
+                           <div
+                              class="car-type car-type--forward"
+                              [class.active]="carType.active"
+                              *ngFor="let carType of calculateCarTypesAndPrices(train.places.cars)"
+                              (click)="getAvailableCars(train,'Forward', carType.type, i); carType.active = true"
+                           >
+                              {{ carType.type }} <strong>{{ carType.freeSeats }}</strong> от
+                              <strong>{{ carType.prices.join(', ') }} </strong> сум
+                           </div>
+                        </div>
 
-                     <div class="train__time-in-way">
-                        <span>В пути</span>
-                        <strong>{{ train.timeInWay }}</strong>
+                        <ng-template #noPlace>
+                           <div class="no-place">мест нет</div>
+                        </ng-template>
                      </div>
                   </div>
 
-                  <div class="train__car-types" *ngIf="train.places.cars.length; else noPlace">
-                     <div
-                        class="car-type car-type--forward"
-                        [class.active]="carType.active"
-                        *ngFor="let carType of calculateCarTypesAndPrices(train.places.cars)"
-                        (click)="getAvailablePlaces(train.number, 'Forward', carType.type, i); carType.active = true"
-                     >
-                        {{ carType.type }} <strong>{{ carType.freeSeats }}</strong> от
-                        <strong>{{ carType.prices.join(', ') }} </strong> сум
-                     </div>
-                  </div>
-                  <ng-template #noPlace>
-                     <div class="no-place">Мест нет</div>
-                  </ng-template>
-
-                  <div class="train__cars cars" *ngIf="forwardAvailableCarTypes.length && train.showCars">
-                     <ng-container *ngFor="let carType of forwardAvailableCarTypes">
-                        <div class="car" *ngFor="let car of carType.car">
+                  <div class="train__cars cars" *ngIf="train.showCars && train.availableCarTypes">
+                     <ng-container
+                        *ngFor="let carType of train.availableCarTypes | sortCarType : selectedForwardCarType">
+                        <div class="car"
+                             [class.active]="car.selected"
+                             *ngFor="let car of carType.car | sortCars"
+                             (click)="selectCar(train.number, carType.type, car.number, car.places, 'Forward'); car.selected = true">
                            <div class="car__header">
                               <div>
                                  <strong class="bold">{{ car.number }}</strong>
@@ -221,7 +229,7 @@
             </ul>
          </div>
 
-         <div class="trains__filter filter">
+         <div class="trains__filter filter" *ngIf="forwardAvailableCarTypesFilter.length">
             <div class="app-card">
                <h2 class="app-card__heading">{{ passRouteForward.from }} → {{ passRouteForward.to }}</h2>
                <div class="filter__section">
@@ -229,7 +237,8 @@
                   <ul class="filter__options options">
                      <li class="options__item" *ngFor="let filterItem of forwardAvailableCarTypesFilter">
                         <label class="options__label cursor-pointer">
-                           <input class="custom-checkbox-input" type="checkbox" (input)="filterTrains(filterItem.carType, 'Forward')">
+                           <input class="custom-checkbox-input" type="checkbox"
+                                  (input)="filterTrains(filterItem.carType, 'Forward')">
                            <span class="custom-checkbox-rect"></span>
                            <span class="options__text">{{ filterItem.carType }}</span>
                            <span class="options__badge">{{ filterItem.freeSeats }}</span>
@@ -241,73 +250,85 @@
             </div>
          </div>
       </div>
+
       <div class="trains__list list" *ngIf="backwardTrains.length">
          <div class="app-card">
             <h2 class="list__heading">Найдено {{ backwardTrains.length }} вариантов для обратно</h2>
 
             <ul class="list__ul">
                <li class="list__item train" *ngFor="let train of backwardTrains; let i = index">
-                  <div class="train__header">
-                     <div class="train__info">
-                        <strong>{{ train.number }} ({{ train.type }}
-                           ) {{ train.brand ? '(' + train.brand + ')' : null }}</strong>
-                        <span>{{ train.route.station[0] }} → {{ train.route.station[1] }}</span>
-                     </div>
-
-                     <div class="train__stations">
-                        <div class="station">
-                           <div class="station__date">{{ train.departure.localDate }}</div>
-                           <div>
-                              <strong class="station__time">{{ train.departure.localTime }}</strong>
-                              <span class="station__name">{{ passRouteForward.to }}</span>
+                  <div class="train__header header">
+                     <div class="header__info">
+                        <div class="train__stations">
+                           <div class="station">
+                              <div class="station__date">{{ train.departure.localDate }}</div>
+                              <div>
+                                 <strong class="station__time">{{ train.departure.localTime }}</strong>
+                                 <span class="station__name">{{ passRouteForward.to }}</span>
+                              </div>
+                           </div>
+                           <svg class="station__arrow" width="12" height="6" viewBox="0 0 12 6" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                              <path
+                                 d="M0.59375 2.8125H9.89062L8.92969 1.875V0.71875L11.4297 3.3125V3.34375L8.92969 5.9375V4.78125L9.875 3.85938H0.59375V2.8125Z"
+                                 fill="#354356"/>
+                           </svg>
+                           <div class="station">
+                              <div class="station__date">{{ train.arrival.localDate }}</div>
+                              <div>
+                                 <strong class="station__time">{{ train.arrival.localTime }}</strong>
+                                 <span class="station__name">{{ passRouteForward.from }}</span>
+                              </div>
                            </div>
                         </div>
-                        <svg class="station__arrow" width="12" height="6" viewBox="0 0 12 6" fill="none"
-                             xmlns="http://www.w3.org/2000/svg">
-                           <path
-                              d="M0.59375 2.8125H9.89062L8.92969 1.875V0.71875L11.4297 3.3125V3.34375L8.92969 5.9375V4.78125L9.875 3.85938H0.59375V2.8125Z"
-                              fill="#354356"/>
-                        </svg>
-                        <div class="station">
-                           <div class="station__date">{{ train.arrival.localDate }}</div>
-                           <div>
-                              <strong class="station__time">{{ train.arrival.localTime }}</strong>
-                              <span class="station__name">{{ passRouteForward.from }}</span>
-                           </div>
+
+                        <div class="train__time-in-way">
+                           <span>В пути</span>
+                           <strong>{{ train.timeInWay }}</strong>
+                        </div>
+
+                        <div class="train__info">
+                           <strong>{{ train.number }} ({{ train.type }}
+                              ) {{ train.brand ? '(' + train.brand + ')' : null }}</strong>
+                           <span>{{ train.route.station[0] }} → {{ train.route.station[1] }}</span>
                         </div>
                      </div>
-
-                     <div class="train__time-in-way">
-                        <span>В пути</span>
-                        <strong>{{ train.timeInWay }}</strong>
+                     <div class="header__car-types">
+                        <div class="train__car-types" *ngIf="train.places.cars.length; else noPlace">
+                           <div
+                              class="car-type car-type--backward"
+                              [class.active]="carType.active"
+                              *ngFor="let carType of calculateCarTypesAndPrices(train.places.cars)"
+                              (click)="getAvailableCars(train, 'Backward', carType.type, i); carType.active = true"
+                           >
+                              {{ carType.type }} <strong>{{ carType.freeSeats }}</strong> от
+                              <strong>{{ carType.prices.join(', ') }} </strong> сум
+                           </div>
+                        </div>
+                        <ng-template #noPlace>
+                           <div class="no-place">мест нет</div>
+                        </ng-template>
                      </div>
                   </div>
 
-                  <div class="train__car-types" *ngIf="train.places.cars.length; else noPlace">
-                     <div
-                        class="car-type car-type--backward"
-                        [class.active]="carType.active"
-                        *ngFor="let carType of calculateCarTypesAndPrices(train.places.cars)"
-                        (click)="getAvailablePlaces(train.number, 'Backward', carType.type, i); carType.active = true"
-                     >
-                        {{ carType.type }} <strong>{{ carType.freeSeats }}</strong> от
-                        <strong>{{ carType.prices.join(', ') }} </strong> сум
-                     </div>
-                  </div>
-                  <ng-template #noPlace>
-                     <div class="no-place">Мест нет</div>
-                  </ng-template>
 
-                  <div class="train__cars cars" *ngIf="backwardAvailableCarTypes.length && train.showCars">
-                     <ng-container *ngFor="let carType of backwardAvailableCarTypes">
-                        <div class="car" *ngFor="let car of carType.car">
+                  <div class="train__cars cars" *ngIf="train.showCars  && train.availableCarTypes">
+                     <ng-container
+                        *ngFor="let carType of train.availableCarTypes | sortCarType : selectedBackwardCarType">
+                        <div class="car"
+                             [class.active]="car.selected"
+                             *ngFor="let car of carType.car | sortCars"
+                             (click)="selectCar(train.number, carType.type, car.number, car.places, 'Backward'); car.selected = true"
+                        >
                            <div class="car__header">
                               <div>
                                  <strong class="bold">{{ car.number }}</strong>
                                  <span class="mini">вагон</span>
                               </div>
                               <div>
-                                 <svg class="car__scheme" (click)="openCarSchemeModal(
+                                 <svg
+                                    class="car__scheme"
+                                    (click)="openCarSchemeModal(
                                        train.brand,
                                        car.number,
                                        train.number,
@@ -315,8 +336,9 @@
                                        car.typeOfCarSchema?.seatsCount,
                                        carType.typeShow,
                                        car.places
-                                    )" width="35" height="18" viewBox="0 0 35 18" fill="none"
-                                      xmlns="http://www.w3.org/2000/svg">
+                                    )"
+                                    width="35" height="18" viewBox="0 0 35 18" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
                                     <rect x="0.5" y="0.5" width="34" height="17" rx="2.5" fill="#EEF0F5"/>
                                     <path fill-rule="evenodd" clip-rule="evenodd"
                                           d="M5 4C4.44772 4 4 4.44772 4 5V6C4 6.55228 4.44772 7 5 7H6C6.55228 7 7 6.55228 7 6V5C7 4.44772 6.55228 4 6 4H5ZM5 11C4.44772 11 4 11.4477 4 12V13C4 13.5523 4.44772 14 5 14H6C6.55228 14 7 13.5523 7 13V12C7 11.4477 6.55228 11 6 11H5Z"
@@ -367,15 +389,18 @@
                </li>
             </ul>
          </div>
-         <div class="trains__filter filter">
+
+         <div class="trains__filter filter" *ngIf="backwardAvailableCarTypesFilter.length">
             <div class="app-card">
-               <h2 class="app-card__heading"><h2 class="app-card__heading">{{ passRouteForward.to }} → {{ passRouteForward.from }}</h2></h2>
+               <h2 class="app-card__heading"><h2 class="app-card__heading">{{ passRouteForward.to }}
+                  → {{ passRouteForward.from }}</h2></h2>
                <div class="filter__section">
                   <h3 class="filter__heading">Тип вагона</h3>
                   <ul class="filter__options options">
                      <li class="options__item" *ngFor="let filterItem of backwardAvailableCarTypesFilter">
                         <label class="options__label cursor-pointer">
-                           <input class="custom-checkbox-input" type="checkbox" (input)="filterTrains(filterItem.carType, 'Backward')">
+                           <input class="custom-checkbox-input" type="checkbox"
+                                  (input)="filterTrains(filterItem.carType, 'Backward')">
                            <span class="custom-checkbox-rect"></span>
                            <span class="options__text">{{ filterItem.carType }}</span>
                            <span class="options__badge">{{ filterItem.freeSeats }}</span>
@@ -390,8 +415,10 @@
 </div>
 
 <div class="app-footer">
-   <button class="button button--red btn mr-20">Отменить</button>
-   <button [routerLink]="['/cabinet/data-entry']" class="button button--blue btn">Продолжить</button>
+   <button
+      class="button button--blue btn"
+      (click)="continue()">Продолжить
+   </button>
 </div>
 
 <div class="car-scheme" [class.car-scheme--open]="carSchemePanelOpen">
@@ -419,6 +446,7 @@
       <app-not-standard25 *ngIf="notStandard === 25"></app-not-standard25>
       <app-not-standard26 *ngIf="notStandard === 26"></app-not-standard26>
       <app-not-standard27 *ngIf="notStandard === 27"></app-not-standard27>
+
       <div class="car-scheme__actions">
          <button class="button button--red btn mr-20" (click)="carSchemePanelOpen = false">Отменить</button>
          <button class="button button--blue btn">Продолжить</button>

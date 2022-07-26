@@ -13,6 +13,7 @@ import { ToastrService } from 'ngx-toastr'
 import { ApiService } from 'src/app/shared/services/api.service'
 import { getNotStandardCar } from '../shared/functions/get-not-standard.function'
 import { markFreeReservedSeats } from '../shared/functions/mark-free-reserved-seats.function'
+import { Router } from '@angular/router'
 
 @Component({
    selector: 'app-ticket-selling',
@@ -58,12 +59,14 @@ export class TicketSellingComponent implements OnInit {
    /* TRAINS LIST */
    public forwardTrains: Array<any> = []
    public forwardTrainsClone: Array<any> = []
-   public forwardAvailableCarTypes: Array<any> = []
    public forwardAvailableCarTypesFilter: Array<any> = []
+   public selectedForwardCarType = ''
+   public selectedForwardCar: any = null
    public backwardTrains: Array<any> = []
    public backwardTrainsClone: Array<any> = []
-   public backwardAvailableCarTypes: Array<any> = []
    public backwardAvailableCarTypesFilter: Array<any> = []
+   public selectedBackwardCarType = ''
+   public selectedBackwardCar: any = null
    public passRouteForward: any
    public passRouteBackward: any
 
@@ -77,7 +80,8 @@ export class TicketSellingComponent implements OnInit {
       public dateService: DatesService,
       private title: Title,
       private toasterService: ToastrService,
-      private apiService: ApiService
+      private apiService: ApiService,
+      private router: Router
    ) {
       this.title.setTitle('Продажа билетов')
    }
@@ -217,6 +221,9 @@ export class TicketSellingComponent implements OnInit {
          })
       }
 
+      this.forwardAvailableCarTypesFilter = this.backwardAvailableCarTypesFilter = []
+      this.selectedForwardCar = this.selectedBackwardCar = null
+
       this.apiService.getTrainsListApi(searchingData).subscribe(res => {
          if (res.express.direction[0].trains && res.express.direction[0].trains[0].train.length) {
             this.forwardTrains = this.forwardTrainsClone = res.express.direction[0].trains[0].train
@@ -302,9 +309,12 @@ export class TicketSellingComponent implements OnInit {
       }
    }
 
-   getAvailablePlaces(trainNumber: string, direction: string, carType: string, i: number) {
+   getAvailableCars(train: any, direction: string, carType: string, i: number) {
+      this.unSelectAllCars(direction)
+
       if (direction === 'Forward') {
-         this.forwardAvailableCarTypes = []
+         this.selectedForwardCarType = carType
+         this.selectedForwardCar = null
          this.forwardTrains.forEach((item: any, index) => {
             item.places.cars.forEach((carType: any) => {
                carType.active = false
@@ -316,7 +326,8 @@ export class TicketSellingComponent implements OnInit {
             item.showCars = false
          })
       } else {
-         this.backwardAvailableCarTypes = []
+         this.selectedBackwardCar = null
+         this.selectedBackwardCarType = carType
          this.backwardTrains.forEach((item: any, index) => {
             item.places.cars.forEach((carType: any) => {
                carType.active = false
@@ -328,33 +339,70 @@ export class TicketSellingComponent implements OnInit {
             item.showCars = false
          })
       }
-      const searchingData = {
-         direction: [
-            {
-               depDate: direction === 'Forward' ? this.dateService.formatDateWithDot(this.forwardDate) : this.dateService.formatDateWithDot(this.backwardDate),
-               fullday: true,
-               type: 'Forward',
-               train: { number: trainNumber }
-            }
-         ],
-         stationFrom: direction === 'Forward' ? this.departureStationCode : this.arrivalStationCode,
-         stationTo: direction !== 'Backward' ? this.arrivalStationCode : this.departureStationCode
+
+      if (!train.availableCarTypes) {
+         const searchingData = {
+            direction: [
+               {
+                  depDate: direction === 'Forward' ? this.dateService.formatDateWithDot(this.forwardDate) : this.dateService.formatDateWithDot(this.backwardDate),
+                  fullday: true,
+                  type: 'Forward',
+                  train: { number: train.number }
+               }
+            ],
+            stationFrom: direction === 'Forward' ? this.departureStationCode : this.arrivalStationCode,
+            stationTo: direction !== 'Backward' ? this.arrivalStationCode : this.departureStationCode
+         }
+         this.apiService.getAvailablePlacesApi(searchingData).subscribe(res => {
+            train.availableCarTypes = res.direction[0].trains[0].train.cars
+         }, _ => {})
       }
-      this.apiService.getAvailablePlacesApi(searchingData).subscribe(res => {
-         if (direction === 'Forward') {
-            this.forwardAvailableCarTypes = res.direction[0].trains[0].train.cars.filter((i: any) => i.type === carType)
-         }
-         if (direction === 'Backward') {
-            this.backwardAvailableCarTypes = res.direction[0].trains[0].train.cars.filter((i: any) => i.type === carType)
-         }
-      }, _ => {
-      })
    }
 
    getFreeSeatsCount(placesList: string): number {
       return placesList.split(',').length
    }
 
+   selectCar(trainNumber: string, carType: string, carNumber: string, carPlaces: string, direction: string) {
+      const freeSeats = carPlaces.split(',')
+      const carData = {
+         train: {
+            number: trainNumber
+         },
+         car: {
+            type: carType,
+            number: carNumber
+         },
+         requirements: {
+            seatsRange: `${parseInt(freeSeats[0])}-${parseInt(freeSeats[freeSeats.length - 1])}`
+         }
+      }
+      this.unSelectAllCars(direction)
+      direction === 'Forward' ? this.selectedForwardCar = carData : this.selectedBackwardCar = carData
+   }
+
+   unSelectAllCars(direction: string) {
+      if (direction === 'Forward') {
+         this.forwardTrains.forEach((train: any) => {
+            if (train.availableCarTypes) {
+               train.availableCarTypes.forEach((carType: any) => {
+                  carType.car.forEach((car: any) => car.selected = false)
+               })
+            }
+         })
+      }
+      if (direction === 'Backward') {
+         this.backwardTrains.forEach((train: any) => {
+            if (train.availableCarTypes) {
+               train.availableCarTypes.forEach((carType: any) => {
+                  carType.car.forEach((car: any) => car.selected = false)
+               })
+            }
+         })
+      }
+   }
+
+   /* CAR SCHEME */
    openCarSchemeModal(
       trainBrand: string,
       carNumber: string,
@@ -377,5 +425,43 @@ export class TicketSellingComponent implements OnInit {
       )
    }
 
-   /* CAR SCHEME */
+   continue() {
+      if (!this.selectedForwardCar) {
+         this.toasterService.warning('Выберите вагон для туда')
+         return
+      }
+
+      if (this.backwardDate && !this.selectedBackwardCar) {
+         this.toasterService.warning('Выберите вагон для обратно')
+         return
+      }
+
+      const data = {
+         backward: !!this.backwardDate,
+         ordersRequest: [
+            {
+               stationFrom: this.departureStationCode,
+               stationTo: this.arrivalStationCode,
+               depDate: this.dateService.formatDateWithDot(this.forwardDate),
+               ...this.selectedForwardCar
+            }
+         ],
+         withInsurance: false,
+         withSmsNotification: false,
+         phone: "998",
+         passengers: []
+      }
+
+      if (this.backwardDate) {
+         data.ordersRequest.push({
+            stationFrom: this.arrivalStationCode,
+            stationTo: this.departureStationCode,
+            depDate: this.dateService.formatDateWithDot(this.backwardDate),
+            ...this.selectedBackwardCar
+         })
+      }
+
+      localStorage.setItem('data', JSON.stringify(data))
+      this.router.navigate(['/cabinet/data-entry'])
+   }
 }
